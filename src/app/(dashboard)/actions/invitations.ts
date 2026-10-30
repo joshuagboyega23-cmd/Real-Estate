@@ -31,31 +31,40 @@ export async function createInvitation(data: unknown): Promise<CreateInvitationR
 
   const { email, role, propertyId, unitId } = parsed.data;
 
-  // Authorization role-tier enforcement
-  if (role === "ADMIN" && user.role !== "OWNER") {
+  // Role restrictions: Nobody can invite OWNER
+  if (role === "OWNER") {
+    return {
+      success: false,
+      error: "Nobody can invite users with the Owner role.",
+    };
+  }
+
+  // Authorization role-tier enforcement: Only OWNER can invite ADMIN
+  if (role === "ADMIN" && user.activeRole !== "OWNER") {
     return {
       success: false,
       error: "Only owners can invite administrators.",
     };
   }
 
-  // Check if an account already exists with this email
+  // Check if an account already exists with this email and already holds the role
   const existingUser = await prisma.user.findUnique({
     where: { email },
-    select: { id: true },
+    select: { id: true, roles: true },
   });
 
-  if (existingUser) {
+  if (existingUser && existingUser.roles.includes(role)) {
     return {
       success: false,
-      error: "A registered user with this email address already exists.",
+      error: `A user with this email address already holds the ${role} role.`,
     };
   }
 
-  // Check if an active pending invitation exists
+  // Check if an active pending invitation exists for this email and role
   const existingPending = await prisma.invitation.findFirst({
     where: {
       email,
+      role,
       status: "PENDING",
       expiresAt: { gt: new Date() },
     },
@@ -65,7 +74,7 @@ export async function createInvitation(data: unknown): Promise<CreateInvitationR
   if (existingPending) {
     return {
       success: false,
-      error: "An active pending invitation for this email address already exists.",
+      error: `An active pending invitation for this email address with role ${role} already exists.`,
     };
   }
 

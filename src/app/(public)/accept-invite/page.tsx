@@ -1,6 +1,7 @@
 import crypto from "node:crypto";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
+import { auth } from "@/auth";
 import { AcceptInviteForm } from "./accept-invite-form";
 import {
   Card,
@@ -83,7 +84,7 @@ export default async function AcceptInvitePage(props: AcceptInvitePageProps) {
           <CardHeader>
             <CardTitle className="text-xl">Invitation Already Used</CardTitle>
             <CardDescription>
-              This invitation has already been accepted and an account was created.
+              This invitation has already been accepted and processed.
             </CardDescription>
           </CardHeader>
           <CardContent className="text-sm text-muted-foreground">
@@ -148,6 +149,41 @@ export default async function AcceptInvitePage(props: AcceptInvitePageProps) {
     );
   }
 
+  const [session, existingUser] = await Promise.all([
+    auth(),
+    prisma.user.findUnique({
+      where: { email: invitation.email },
+      select: { id: true, roles: true },
+    }),
+  ]);
+
+  if (existingUser && existingUser.roles.includes(invitation.role)) {
+    return (
+      <div className="flex min-h-screen items-center justify-center p-4">
+        <Card className="w-full max-w-md shadow-md text-center">
+          <CardHeader>
+            <CardTitle className="text-xl">Role Already Active</CardTitle>
+            <CardDescription>
+              Your account already holds the {invitation.role} role.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="text-sm text-muted-foreground">
+            You can sign in and switch to this role directly from your account menu.
+          </CardContent>
+          <CardFooter className="flex justify-center">
+            <Button asChild>
+              <Link href="/login">Sign In</Link>
+            </Button>
+          </CardFooter>
+        </Card>
+      </div>
+    );
+  }
+
+  const hasAccount = !!existingUser;
+  const isAlreadyLoggedIn =
+    session?.user?.email?.toLowerCase() === invitation.email.toLowerCase();
+
   return (
     <div className="flex min-h-screen items-center justify-center p-4">
       <AcceptInviteForm
@@ -155,8 +191,9 @@ export default async function AcceptInvitePage(props: AcceptInvitePageProps) {
         email={invitation.email}
         role={invitation.role}
         propertyName={invitation.property?.name}
+        hasAccount={hasAccount}
+        isAlreadyLoggedIn={isAlreadyLoggedIn}
       />
     </div>
   );
 }
-

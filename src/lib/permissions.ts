@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
@@ -9,6 +10,16 @@ export const roleHomeMap: Record<Role, string> = {
   CARETAKER: "/caretaker",
   ADMIN: "/admin",
 };
+
+/**
+ * Request-cached retrieval of user roles and active status from the database.
+ */
+export const getDbUser = cache(async (userId: string) => {
+  return prisma.user.findUnique({
+    where: { id: userId },
+    select: { id: true, roles: true, lastActiveRole: true, isActive: true },
+  });
+});
 
 /**
  * Returns the currently authenticated user from the session,
@@ -23,16 +34,32 @@ export async function requireUser() {
 }
 
 /**
- * Validates that the authenticated user possesses one of the allowed roles.
- * If not authorized, redirects to the user's designated home dashboard area.
+ * Validates that the authenticated user possesses one of the allowed roles,
+ * confirms against the database (request-cached), and ensures active status.
  */
 export async function requireRole(allowedRoles: Role[]) {
   const user = await requireUser();
-  if (!allowedRoles.includes(user.role)) {
-    const ownArea = roleHomeMap[user.role] || "/login";
+  const dbUser = await getDbUser(user.id);
+
+  if (!dbUser || !dbUser.isActive) {
+    redirect("/login");
+  }
+
+  const activeRole = user.activeRole;
+  if (!dbUser.roles.includes(activeRole) || !allowedRoles.includes(activeRole)) {
+    const matchingRole = allowedRoles.find((r) => dbUser.roles.includes(r));
+    if (matchingRole) {
+      redirect(roleHomeMap[matchingRole] || "/login");
+    }
+    const ownArea = roleHomeMap[activeRole] || "/login";
     redirect(ownArea);
   }
-  return user;
+
+  return {
+    ...user,
+    roles: dbUser.roles,
+    activeRole,
+  };
 }
 
 /**
@@ -42,20 +69,21 @@ export async function requireRole(allowedRoles: Role[]) {
  * - CARETAKER can access properties they are assigned to
  */
 export async function canAccessProperty(
-  user: { id: string; role: Role },
+  user: { id: string; activeRole?: Role; role?: Role; roles?: Role[] },
   propertyId: string
 ): Promise<boolean> {
-  if (user.role === "ADMIN") {
+  const currentRole = user.activeRole || user.role;
+  if (currentRole === "ADMIN") {
     return true;
   }
-  if (user.role === "OWNER") {
+  if (currentRole === "OWNER") {
     const property = await prisma.property.findFirst({
       where: { id: propertyId, ownerId: user.id },
       select: { id: true },
     });
     return !!property;
   }
-  if (user.role === "CARETAKER") {
+  if (currentRole === "CARETAKER") {
     const assignment = await prisma.propertyCaretaker.findUnique({
       where: {
         propertyId_userId: {
@@ -75,13 +103,13 @@ export async function canAccessProperty(
  * Redirects to the user's dashboard area if access is denied.
  */
 export async function assertCanAccessProperty(
-  user: { id: string; role: Role },
+  user: { id: string; activeRole?: Role; role?: Role; roles?: Role[] },
   propertyId: string
 ): Promise<void> {
   const allowed = await canAccessProperty(user, propertyId);
   if (!allowed) {
-    const ownArea = roleHomeMap[user.role] || "/login";
+    const currentRole = user.activeRole || user.role || "TENANT";
+    const ownArea = roleHomeMap[currentRole] || "/login";
     redirect(ownArea);
   }
 }
-

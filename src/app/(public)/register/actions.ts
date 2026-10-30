@@ -49,7 +49,8 @@ export async function registerAction(data: unknown): Promise<RegisterResult> {
           name,
           email,
           passwordHash,
-          role: "OWNER",
+          roles: ["OWNER"],
+          lastActiveRole: "OWNER",
           isActive: true,
         },
       });

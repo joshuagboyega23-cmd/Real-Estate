@@ -14,10 +14,10 @@ const roleHomeMap: Record<string, string> = {
 export default auth((req) => {
   const { nextUrl } = req;
   const isLoggedIn = !!req.auth;
-  const userRole = req.auth?.user?.role;
+  const activeRole = req.auth?.user?.activeRole;
   const pathname = nextUrl.pathname;
 
-  const roleHome = userRole && roleHomeMap[userRole] ? roleHomeMap[userRole] : "/login";
+  const roleHome = activeRole && roleHomeMap[activeRole] ? roleHomeMap[activeRole] : "/login";
 
   const isAuthRoute = pathname.startsWith("/login") || pathname.startsWith("/register");
   const isDashboardRoute =
@@ -31,25 +31,25 @@ export default auth((req) => {
     return NextResponse.redirect(new URL(roleHome, nextUrl));
   }
 
-  // Unauthenticated users hitting /owner, /tenant, /caretaker or /admin are redirected to /login
+  // Unauthenticated users hitting dashboard routes are redirected to /login
   if (!isLoggedIn && isDashboardRoute) {
     const loginUrl = new URL("/login", nextUrl);
     loginUrl.searchParams.set("callbackUrl", pathname);
     return NextResponse.redirect(loginUrl);
   }
 
-  // Each role may only access its own area; anyone entering another role's area is redirected to their own
-  if (isLoggedIn && userRole) {
-    if (pathname.startsWith("/owner") && userRole !== "OWNER") {
+  // Each role may only access its own active area; visiting another redirects to active role home
+  if (isLoggedIn && activeRole) {
+    if (pathname.startsWith("/owner") && activeRole !== "OWNER") {
       return NextResponse.redirect(new URL(roleHome, nextUrl));
     }
-    if (pathname.startsWith("/tenant") && userRole !== "TENANT") {
+    if (pathname.startsWith("/tenant") && activeRole !== "TENANT") {
       return NextResponse.redirect(new URL(roleHome, nextUrl));
     }
-    if (pathname.startsWith("/caretaker") && userRole !== "CARETAKER") {
+    if (pathname.startsWith("/caretaker") && activeRole !== "CARETAKER") {
       return NextResponse.redirect(new URL(roleHome, nextUrl));
     }
-    if (pathname.startsWith("/admin") && userRole !== "ADMIN") {
+    if (pathname.startsWith("/admin") && activeRole !== "ADMIN") {
       return NextResponse.redirect(new URL(roleHome, nextUrl));
     }
   }
@@ -62,4 +62,3 @@ export const config = {
     "/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };
-

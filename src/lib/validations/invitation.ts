@@ -50,3 +50,10 @@ export interface AcceptInviteResult {
   fieldErrors?: Record<string, string[]>;
 }
 
+export const acceptInviteExistingSchema = z.object({
+  token: z.string().min(1, "Invitation token is required"),
+  password: z.string().optional(),
+});
+
+export type AcceptInviteExistingInput = z.infer<typeof acceptInviteExistingSchema>;
+

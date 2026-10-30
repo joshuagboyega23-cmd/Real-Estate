@@ -14,11 +14,18 @@ export const authConfig: NextAuthConfig = {
     strategy: "jwt",
   },
   callbacks: {
-    jwt({ token, user }) {
+    jwt({ token, user, trigger, session }) {
       if (user) {
         token.id = user.id;
-        token.role = user.role as Role;
+        token.roles = (user.roles || []) as Role[];
+        token.activeRole = user.activeRole as Role;
         token.timezone = user.timezone;
+      }
+      if (trigger === "update" && session?.activeRole) {
+        token.activeRole = session.activeRole as Role;
+        if (session.roles) {
+          token.roles = session.roles as Role[];
+        }
       }
       return token;
     },
@@ -27,8 +34,11 @@ export const authConfig: NextAuthConfig = {
         if (token.id) {
           session.user.id = token.id as string;
         }
-        if (token.role) {
-          session.user.role = token.role as Role;
+        if (token.roles) {
+          session.user.roles = token.roles as Role[];
+        }
+        if (token.activeRole) {
+          session.user.activeRole = token.activeRole as Role;
         }
         session.user.timezone = token.timezone as string | null | undefined;
       }
@@ -37,4 +47,3 @@ export const authConfig: NextAuthConfig = {
   },
   providers: [],
 };
-

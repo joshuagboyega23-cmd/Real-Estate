@@ -8,6 +8,19 @@ import {
   Menu,
   LogOut,
   Building,
+  LayoutDashboard,
+  Mail,
+  Building2,
+  DoorOpen,
+  FileText,
+  CreditCard,
+  Wrench,
+  FolderOpen,
+  Users,
+  Activity,
+  BarChart,
+  Settings,
+  ArrowLeftRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -28,21 +41,56 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import type { Role } from "@/generated/prisma/client";
+import { switchRole } from "@/app/(dashboard)/actions/roles";
+
+export type NavIconKey =
+  | "overview"
+  | "properties"
+  | "units"
+  | "leases"
+  | "payments"
+  | "maintenance"
+  | "documents"
+  | "invitations"
+  | "users"
+  | "activity"
+  | "reports"
+  | "settings";
+
+const iconMap: Record<NavIconKey, React.ComponentType<{ className?: string }>> = {
+  overview: LayoutDashboard,
+  properties: Building2,
+  units: DoorOpen,
+  leases: FileText,
+  payments: CreditCard,
+  maintenance: Wrench,
+  documents: FolderOpen,
+  invitations: Mail,
+  users: Users,
+  activity: Activity,
+  reports: BarChart,
+  settings: Settings,
+};
 
 export interface NavItem {
   title: string;
   href: string;
-  icon?: React.ComponentType<{ className?: string }>;
+  icon?: NavIconKey;
   disabled?: boolean;
   badge?: string;
 }
 
+export interface DashboardUser {
+  id?: string;
+  name?: string | null;
+  email?: string | null;
+  role: Role;
+  roles?: Role[];
+  timezone?: string | null;
+}
+
 interface DashboardShellProps {
-  user: {
-    name?: string | null;
-    email?: string | null;
-    role: Role;
-  };
+  user: DashboardUser;
   navItems: NavItem[];
   children: React.ReactNode;
 }
@@ -50,6 +98,7 @@ interface DashboardShellProps {
 export function DashboardShell({ user, navItems, children }: DashboardShellProps) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = React.useState(false);
+  const [isSwitchingRole, startTransition] = React.useTransition();
 
   const initials = user.name
     ? user.name
@@ -63,7 +112,7 @@ export function DashboardShell({ user, navItems, children }: DashboardShellProps
   const renderNavLinks = () => (
     <nav className="flex flex-col gap-1 px-2 py-4">
       {navItems.map((item) => {
-        const Icon = item.icon;
+        const Icon = item.icon ? iconMap[item.icon] : undefined;
         const isActive = pathname === item.href;
 
         if (item.disabled) {
@@ -166,6 +215,43 @@ export function DashboardShell({ user, navItems, children }: DashboardShellProps
                   <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
                 </div>
               </DropdownMenuLabel>
+
+              {user.roles && user.roles.length > 1 && (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuLabel className="text-xs text-muted-foreground font-semibold px-2 py-1">
+                    Switch Role
+                  </DropdownMenuLabel>
+                  {user.roles
+                    .filter((r) => r !== user.role)
+                    .map((r) => {
+                      const roleLabel =
+                        r === "OWNER"
+                          ? "Owner view"
+                          : r === "ADMIN"
+                          ? "Admin view"
+                          : r === "CARETAKER"
+                          ? "Caretaker view"
+                          : "Tenant view";
+                      return (
+                        <DropdownMenuItem
+                          key={r}
+                          disabled={isSwitchingRole}
+                          className="cursor-pointer"
+                          onClick={() => {
+                            startTransition(async () => {
+                              await switchRole(r);
+                            });
+                          }}
+                        >
+                          <ArrowLeftRight className="mr-2 size-4 text-muted-foreground" />
+                          <span>Switch to {roleLabel}</span>
+                        </DropdownMenuItem>
+                      );
+                    })}
+                </>
+              )}
+
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 className="cursor-pointer text-destructive focus:text-destructive"

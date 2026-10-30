@@ -72,7 +72,8 @@ model User {
   emailVerified     DateTime?
   image             String?
   passwordHash      String?
-  role              Role      @default(TENANT)
+  roles             Role[]    @default([TENANT])
+  lastActiveRole    Role?
   phone             String?
   timezone          String    @default("UTC")
   preferredCurrency String?

@@ -1,16 +1,26 @@
 "use server";
 
-import { signIn } from "@/auth";
+import { headers } from "next/headers";
+import { signIn, determineActiveRole } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { checkLoginRateLimit } from "@/lib/rate-limit";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { AuthError } from "next-auth";
 import {
   loginSchema,
   type LoginResult,
 } from "@/lib/validations/auth";
+import type { Role } from "@/generated/prisma/client";
+
+const roleRedirectMap: Record<Role, string> = {
+  OWNER: "/owner",
+  TENANT: "/tenant",
+  CARETAKER: "/caretaker",
+  ADMIN: "/admin",
+};
 
 /**
- * Server action to authenticate credentials and redirect based on Role.
+ * Server action to authenticate credentials and redirect based on activeRole.
  * OWNER -> /owner, TENANT -> /tenant, CARETAKER -> /caretaker, ADMIN -> /admin
  */
 export async function loginAction(data: unknown): Promise<LoginResult> {
@@ -25,27 +35,36 @@ export async function loginAction(data: unknown): Promise<LoginResult> {
   const { email, password } = parsed.data;
   const normalizedEmail = email.toLowerCase().trim();
 
-  // Pre-fetch role for dynamic role-based redirect
+  // Extract client IP address for rate limiting
+  const headersList = await headers();
+  const forwarded = headersList.get("x-forwarded-for");
+  const realIp = headersList.get("x-real-ip");
+  const clientIp = forwarded ? forwarded.split(",")[0].trim() : (realIp || "unknown");
+
+  // Rate limiting check prior to database lookup (mitigating user enumeration / brute-force)
+  const rateLimit = checkLoginRateLimit(normalizedEmail, clientIp);
+  if (!rateLimit.success) {
+    return {
+      success: false,
+      error: "Too many login attempts. Please try again in 15 minutes.",
+    };
+  }
+
+  // Pre-fetch roles for dynamic role-based redirect
   const user = await prisma.user.findUnique({
     where: { email: normalizedEmail },
-    select: { role: true, isActive: true },
+    select: { roles: true, lastActiveRole: true, isActive: true },
   });
 
-  if (!user || !user.isActive) {
+  if (!user || !user.isActive || user.roles.length === 0) {
     return {
       success: false,
       error: "Invalid email or password.",
     };
   }
 
-  const roleRedirectMap: Record<string, string> = {
-    OWNER: "/owner",
-    TENANT: "/tenant",
-    CARETAKER: "/caretaker",
-    ADMIN: "/admin",
-  };
-
-  const redirectTo = roleRedirectMap[user.role] || "/owner";
+  const activeRole = determineActiveRole(user.roles, user.lastActiveRole);
+  const redirectTo = roleRedirectMap[activeRole] || "/login";
 
   try {
     await signIn("credentials", {
@@ -72,4 +91,3 @@ export async function loginAction(data: unknown): Promise<LoginResult> {
     };
   }
 }
-
