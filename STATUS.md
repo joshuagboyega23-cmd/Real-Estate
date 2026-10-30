@@ -97,22 +97,22 @@
 ---
 
 ## 8. Auth & App Code
-- **Status:** ❌ In Progress
+- **Status:** ✅ Pass (Auth, Route Protection, Dashboards, and Invitations implemented)
 - **Details:**
-  - `src/lib/prisma.ts`: ❌ Missing
-  - `src/lib/auth.ts`: ❌ Missing
-  - `src/lib/permissions.ts`: ❌ Missing
-  - `src/lib/money.ts`: ❌ Missing
-  - `src/lib/activity.ts`: ❌ Missing
-  - `middleware.ts`: ❌ Missing
-  - Login page: ❌ Missing
-  - Register page: ❌ Missing
-  - Accept-invite page: ❌ Missing
-  - Owner dashboard: ❌ Missing
-  - Tenant dashboard: ❌ Missing
-  - Caretaker dashboard: ❌ Missing
-  - Admin dashboard: ❌ Missing
-  - `prisma/seed.ts`: ❌ Missing
+  - `src/lib/prisma.ts`: ✅ Present
+  - `src/lib/auth.ts`: ✅ Present
+  - `src/lib/permissions.ts`: ✅ Present
+  - `src/lib/money.ts`: ✅ Present
+  - `src/lib/activity.ts`: ✅ Present
+  - `src/proxy.ts` (Next.js 16 proxy convention): ✅ Present
+  - Login page (`/login`): ✅ Present
+  - Register page (`/register`): ✅ Present
+  - Accept-invite page (`/accept-invite`): ✅ Present
+  - Owner dashboard (`/owner`, `/owner/invitations`): ✅ Present
+  - Tenant dashboard (`/tenant`): ✅ Present
+  - Caretaker dashboard (`/caretaker`): ✅ Present
+  - Admin dashboard (`/admin`, `/admin/invitations`): ✅ Present
+  - `prisma/seed.ts`: ❌ Pending (Phase 1D)
 
 ---
 
@@ -120,7 +120,7 @@
 - **Status:** ✅ Pass
 - **Details:**
   - `npm run lint`: 0 errors
-  - `npm run build`: 0 errors (Compiled successfully in Turbopack)
+  - `npm run build`: 0 errors (All 13 routes compiled & optimized with Turbopack)
 
 ---
 
@@ -132,5 +132,5 @@
 ---
 
 ## Summary & Phase 1 Progress
-- **Phase 1 Progress:** 5 of 9 steps done (scaffold, shadcn, env, schema, migration)
-- **Recommended Next Step:** Set up auth configuration (`src/lib/prisma.ts`, `src/lib/auth.ts`), route protection (`middleware.ts`), and seed script (`prisma/seed.ts`).
+- **Phase 1 Progress:** 8 of 9 steps done (scaffold, shadcn, env, schema, migration, auth, route protection, dashboards)
+- **Recommended Next Step:** Create the seed script (`prisma/seed.ts`).
