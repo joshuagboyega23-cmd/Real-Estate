@@ -1,7 +1,8 @@
 import type { MetadataRoute } from "next";
+import { getAppUrl } from "@/lib/app-url";
 
 export default function robots(): MetadataRoute.Robots {
-  const baseUrl = process.env.AUTH_URL || "http://localhost:3000";
+  const baseUrl = getAppUrl();
 
   return {
     rules: {
@@ -20,7 +21,6 @@ export default function robots(): MetadataRoute.Robots {
         "/api/*",
       ],
     },
-    sitemap: `${baseUrl.replace(/\/+$/, "")}/sitemap.xml`,
+    sitemap: `${baseUrl}/sitemap.xml`,
   };
 }
-

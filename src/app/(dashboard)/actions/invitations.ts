@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/permissions";
 import { logActivity } from "@/lib/activity";
+import { getAppUrl } from "@/lib/app-url";
 import {
   createInvitationSchema,
   type CreateInvitationResult,
@@ -112,8 +113,8 @@ export async function createInvitation(data: unknown): Promise<CreateInvitationR
       },
     });
 
-    const baseUrl = process.env.AUTH_URL || "http://localhost:3000";
-    const inviteLink = `${baseUrl.replace(/\/+$/, "")}/accept-invite?token=${rawToken}`;
+    const baseUrl = getAppUrl();
+    const inviteLink = `${baseUrl}/accept-invite?token=${rawToken}`;
 
     revalidatePath("/owner/invitations");
     revalidatePath("/admin/invitations");
