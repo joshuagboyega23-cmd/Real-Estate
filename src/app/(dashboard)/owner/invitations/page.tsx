@@ -6,7 +6,7 @@ import {
   type PropertyOption,
 } from "@/components/dashboard/invitations-view";
 
-export const instant = false;
+export const dynamic = "force-dynamic";
 
 export default async function OwnerInvitationsPage() {
   const user = await requireRole(["OWNER"]);
@@ -48,7 +48,7 @@ export default async function OwnerInvitationsPage() {
 
   return (
     <InvitationsView
-      currentUserRole={user.role}
+      currentUserRole={user.activeRole}
       invitations={invitations}
       properties={properties}
     />

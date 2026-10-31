@@ -32,7 +32,7 @@ export async function createInvitation(data: unknown): Promise<CreateInvitationR
   const { email, role, propertyId, unitId } = parsed.data;
 
   // Role restrictions: Nobody can invite OWNER
-  if (role === "OWNER") {
+  if ((role as string) === "OWNER") {
     return {
       success: false,
       error: "Nobody can invite users with the Owner role.",

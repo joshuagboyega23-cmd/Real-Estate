@@ -1,7 +1,7 @@
 import { isRegistrationOpen } from "@/app/(public)/register/actions";
 import { LoginForm } from "./login-form";
 
-export const instant = false;
+export const dynamic = "force-dynamic";
 
 
 export default async function LoginPage() {

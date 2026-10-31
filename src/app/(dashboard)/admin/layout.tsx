@@ -1,7 +1,7 @@
 import { requireRole } from "@/lib/permissions";
 import { DashboardShell, type NavItem } from "@/components/dashboard/shell";
 
-export const instant = false;
+export const dynamic = "force-dynamic";
 
 const adminNavItems: NavItem[] = [
   { title: "Overview", href: "/admin", icon: "overview" },

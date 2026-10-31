@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/card";
 import { Building2, CreditCard, Wrench } from "lucide-react";
 
-export const instant = false;
+export const dynamic = "force-dynamic";
 
 export default async function CaretakerOverviewPage() {
   const user = await requireRole(["CARETAKER"]);

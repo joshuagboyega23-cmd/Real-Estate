@@ -11,7 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Building2, DoorOpen, Home, CreditCard, Wrench, Plus } from "lucide-react";
 
-export const instant = false;
+export const dynamic = "force-dynamic";
 
 export default async function OwnerOverviewPage() {
   const user = await requireRole(["OWNER"]);

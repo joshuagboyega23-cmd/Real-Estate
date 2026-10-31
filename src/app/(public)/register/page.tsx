@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
-export const instant = false;
+export const dynamic = "force-dynamic";
 
 
 export default async function RegisterPage() {
