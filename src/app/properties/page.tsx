@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
+import type { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { formatMoney, toMinor } from "@/lib/money";
 import { Card, CardContent } from "@/components/ui/card";
@@ -13,7 +14,6 @@ import {
   DoorOpen,
   Filter,
   Search,
-  ArrowRight,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
@@ -50,7 +50,7 @@ export default async function PublicPropertiesPage(props: PropertiesPageProps) {
   const page = Math.max(1, parseInt(searchParams.page || "1", 10));
 
   // Build Prisma where filter
-  const where: any = {
+  const where: Prisma.PropertyWhereInput = {
     isPublished: true,
   };
 
@@ -62,7 +62,7 @@ export default async function PublicPropertiesPage(props: PropertiesPageProps) {
     ];
   }
 
-  const unitFilter: any = {};
+  const unitFilter: Prisma.UnitWhereInput = {};
   if (bedrooms && !isNaN(bedrooms)) {
     unitFilter.bedrooms = { gte: bedrooms };
   }
@@ -80,9 +80,12 @@ export default async function PublicPropertiesPage(props: PropertiesPageProps) {
   const totalCount = await prisma.property.count({ where });
   const totalPages = Math.ceil(totalCount / PAGE_SIZE) || 1;
 
+  const orderBy: Prisma.PropertyOrderByWithRelationInput =
+    sort === "oldest" ? { createdAt: "asc" } : { createdAt: "desc" };
+
   const properties = await prisma.property.findMany({
     where,
-    orderBy: { createdAt: "desc" },
+    orderBy,
     skip: (page - 1) * PAGE_SIZE,
     take: PAGE_SIZE,
     include: {

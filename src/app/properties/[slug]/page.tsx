@@ -21,9 +21,7 @@ import {
   Compass,
   Phone,
   Mail,
-  DoorOpen,
   ArrowLeft,
-  Calendar,
 } from "lucide-react";
 
 export const dynamic = "force-dynamic";

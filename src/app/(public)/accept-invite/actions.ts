@@ -197,7 +197,7 @@ export async function acceptInviteExistingAction(data: unknown): Promise<AcceptI
     }
   }
 
-  let redirectTo = roleHomeMap[invitation.role] || "/login";
+  const redirectTo = roleHomeMap[invitation.role] || "/login";
 
   try {
     const updatedRoles = existingUser.roles.includes(invitation.role)

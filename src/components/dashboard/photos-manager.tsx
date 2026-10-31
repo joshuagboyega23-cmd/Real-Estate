@@ -8,7 +8,7 @@ import {
   deletePhoto,
   reorderPhotos,
 } from "@/app/(dashboard)/actions/properties";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -97,11 +97,6 @@ export function PhotosManager({
   const [uploadProgress, setUploadProgress] = React.useState<string | null>(null);
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
-
-  // Sync state if initialPhotos changes
-  React.useEffect(() => {
-    setPhotos(initialPhotos);
-  }, [initialPhotos]);
 
   const handleFiles = async (files: FileList | null) => {
     if (!files || files.length === 0) return;

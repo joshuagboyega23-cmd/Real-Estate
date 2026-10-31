@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -19,7 +18,6 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import {
-  Building2,
   MapPin,
   Edit,
   Trash2,
@@ -65,7 +63,6 @@ export function PropertyDetailsView({
   basePath,
   canManage,
 }: PropertyDetailsViewProps) {
-  const router = useRouter();
   const [isPublished, setIsPublished] = React.useState(property.isPublished);
   const [isTogglingPublish, startPublishTransition] = React.useTransition();
   const [isDeleting, startDeleteTransition] = React.useTransition();
