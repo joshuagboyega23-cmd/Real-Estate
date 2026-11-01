@@ -24,7 +24,7 @@ export default async function AcceptInvitePage(props: AcceptInvitePageProps) {
 
   if (!token) {
     return (
-      <div className="flex min-h-screen items-center justify-center p-4">
+      <div className="flex w-full items-center justify-center p-4">
         <Card className="w-full max-w-md shadow-md text-center">
           <CardHeader>
             <CardTitle className="text-xl">Invalid Invitation Link</CardTitle>
@@ -56,7 +56,7 @@ export default async function AcceptInvitePage(props: AcceptInvitePageProps) {
 
   if (!invitation) {
     return (
-      <div className="flex min-h-screen items-center justify-center p-4">
+      <div className="flex w-full items-center justify-center p-4">
         <Card className="w-full max-w-md shadow-md text-center">
           <CardHeader>
             <CardTitle className="text-xl">Invitation Not Found</CardTitle>
@@ -79,7 +79,7 @@ export default async function AcceptInvitePage(props: AcceptInvitePageProps) {
 
   if (invitation.status === "ACCEPTED") {
     return (
-      <div className="flex min-h-screen items-center justify-center p-4">
+      <div className="flex w-full items-center justify-center p-4">
         <Card className="w-full max-w-md shadow-md text-center">
           <CardHeader>
             <CardTitle className="text-xl">Invitation Already Used</CardTitle>
@@ -102,7 +102,7 @@ export default async function AcceptInvitePage(props: AcceptInvitePageProps) {
 
   if (invitation.status === "REVOKED") {
     return (
-      <div className="flex min-h-screen items-center justify-center p-4">
+      <div className="flex w-full items-center justify-center p-4">
         <Card className="w-full max-w-md shadow-md text-center">
           <CardHeader>
             <CardTitle className="text-xl">Invitation Revoked</CardTitle>
@@ -128,7 +128,7 @@ export default async function AcceptInvitePage(props: AcceptInvitePageProps) {
 
   if (isExpired) {
     return (
-      <div className="flex min-h-screen items-center justify-center p-4">
+      <div className="flex w-full items-center justify-center p-4">
         <Card className="w-full max-w-md shadow-md text-center">
           <CardHeader>
             <CardTitle className="text-xl">Invitation Expired</CardTitle>
@@ -159,7 +159,7 @@ export default async function AcceptInvitePage(props: AcceptInvitePageProps) {
 
   if (existingUser && existingUser.roles.includes(invitation.role)) {
     return (
-      <div className="flex min-h-screen items-center justify-center p-4">
+      <div className="flex w-full items-center justify-center p-4">
         <Card className="w-full max-w-md shadow-md text-center">
           <CardHeader>
             <CardTitle className="text-xl">Role Already Active</CardTitle>
@@ -185,7 +185,7 @@ export default async function AcceptInvitePage(props: AcceptInvitePageProps) {
     session?.user?.email?.toLowerCase() === invitation.email.toLowerCase();
 
   return (
-    <div className="flex min-h-screen items-center justify-center p-4">
+    <div className="flex w-full items-center justify-center p-4">
       <AcceptInviteForm
         token={token}
         email={invitation.email}

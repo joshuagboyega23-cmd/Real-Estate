@@ -15,7 +15,7 @@ export function PropertyGallery({ images, propertyName }: PropertyGalleryProps) 
 
   if (images.length === 0) {
     return (
-      <div className="relative aspect-16/9 w-full rounded-2xl bg-muted flex items-center justify-center border">
+      <div className="relative flex aspect-16/9 w-full items-center justify-center rounded-2xl border bg-sky">
         <Building2 className="size-16 text-muted-foreground/30" />
       </div>
     );
@@ -32,13 +32,13 @@ export function PropertyGallery({ images, propertyName }: PropertyGalleryProps) 
   return (
     <div className="space-y-3">
       {/* Main Image */}
-      <div className="relative aspect-16/9 w-full rounded-2xl bg-muted overflow-hidden border group">
+      <div className="group relative aspect-16/9 w-full overflow-hidden rounded-2xl border bg-sky shadow-sm">
         <Image
           src={images[selectedIndex]}
           alt={`${propertyName} photo ${selectedIndex + 1}`}
           fill
           priority
-          className="object-cover"
+          className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
           sizes="(max-width: 1024px) 100vw, 1200px"
         />
 
@@ -79,7 +79,7 @@ export function PropertyGallery({ images, propertyName }: PropertyGalleryProps) 
               onClick={() => setSelectedIndex(idx)}
               className={`relative size-16 sm:size-20 rounded-lg overflow-hidden shrink-0 border-2 transition-all ${
                 idx === selectedIndex
-                  ? "border-primary ring-2 ring-primary/20 scale-95"
+                  ? "scale-95 border-primary ring-2 ring-primary/20"
                   : "border-transparent opacity-70 hover:opacity-100"
               }`}
             >
@@ -97,4 +97,3 @@ export function PropertyGallery({ images, propertyName }: PropertyGalleryProps) 
     </div>
   );
 }
-

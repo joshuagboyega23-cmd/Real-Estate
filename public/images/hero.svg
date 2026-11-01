@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080">
+  <defs>
+    <linearGradient id="sky" x2="0" y2="1">
+      <stop stop-color="#7fc4ee"/>
+      <stop offset=".68" stop-color="#f8d7a2"/>
+      <stop offset="1" stop-color="#f6c889"/>
+    </linearGradient>
+    <linearGradient id="house" x2="0" y2="1">
+      <stop stop-color="#fff"/>
+      <stop offset="1" stop-color="#e4edf4"/>
+    </linearGradient>
+    <linearGradient id="grass" x2="0" y2="1">
+      <stop stop-color="#90b978"/>
+      <stop offset="1" stop-color="#497c51"/>
+    </linearGradient>
+  </defs>
+  <rect width="1920" height="1080" fill="url(#sky)"/>
+  <circle cx="1420" cy="270" r="118" fill="#ffe5ae" opacity=".8"/>
+  <g fill="#fff" opacity=".48">
+    <ellipse cx="1450" cy="185" rx="170" ry="31"/>
+    <ellipse cx="1540" cy="178" rx="98" ry="39"/>
+    <ellipse cx="1120" cy="350" rx="130" ry="22"/>
+    <ellipse cx="1200" cy="344" rx="75" ry="29"/>
+  </g>
+  <path d="M0 780Q380 675 760 770T1500 720T1920 760V1080H0Z" fill="url(#grass)"/>
+  <path d="M520 510 1010 270l520 240v420H520Z" fill="url(#house)"/>
+  <path d="m440 530 570-302 600 302-30 52-570-286-540 286Z" fill="#f5f7f8"/>
+  <rect x="675" y="575" width="270" height="200" rx="8" fill="#a9d8ed"/>
+  <rect x="995" y="575" width="260" height="200" rx="8" fill="#8fc7e2"/>
+  <rect x="1300" y="575" width="150" height="420" rx="6" fill="#d0aa7f"/>
+  <rect x="720" y="824" width="240" height="106" rx="6" fill="#89c3df"/>
+  <path d="M590 997h930" stroke="#d3d9d4" stroke-width="14" opacity=".8"/>
+  <g fill="#426d45">
+    <path d="M280 790q-10-190 24-300 29 136 36 300z"/>
+    <path d="M220 520q58-48 114-44-44 36-92 61 65-19 122 3-73 7-132 13 62 12 95 59-66-30-112-45 33 47 28 93-29-62-45-111-6 55-42 91 19-69 27-118-41 32-91 35 64-35 106-54-67 3-104-27 79 16 126 27z"/>
+    <path d="M1625 820q-3-170 24-274 25 128 29 274z"/>
+    <path d="M1575 568q51-43 101-39-39 33-81 53 58-16 108 4-65 6-117 12 55 11 84 52-58-27-99-40 29 41 25 82-25-55-39-99-6 49-37 81 17-62 24-105-36 28-81 31 57-31 94-48-60 2-92-24 70 14 110 24z"/>
+  </g>
+</svg>

@@ -199,11 +199,11 @@ export function UnitsTable({ propertyId, currency, units, canManage }: UnitsTabl
   const getStatusBadge = (unitStatus: UnitStatus) => {
     switch (unitStatus) {
       case "VACANT":
-        return <Badge variant="secondary" className="bg-emerald-500/15 text-emerald-700 dark:text-emerald-400">Vacant</Badge>;
+        return <Badge variant="secondary" className="border-success/20 bg-success/10 text-success">Vacant</Badge>;
       case "OCCUPIED":
-        return <Badge variant="default">Occupied</Badge>;
+        return <Badge variant="secondary" className="border-info/20 bg-info/10 text-info">Occupied</Badge>;
       case "MAINTENANCE":
-        return <Badge variant="outline" className="border-amber-500/50 text-amber-700 dark:text-amber-400">Maintenance</Badge>;
+        return <Badge variant="outline" className="border-warning/40 bg-warning/10 text-warning">Maintenance</Badge>;
       default:
         return <Badge variant="outline">{unitStatus}</Badge>;
     }
@@ -522,4 +522,3 @@ export function UnitsTable({ propertyId, currency, units, canManage }: UnitsTabl
     </div>
   );
 }
-

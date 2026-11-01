@@ -159,7 +159,7 @@ export function InvitationsView({
     const isExpired = new Date(expiresAt) < new Date();
 
     if (status === "ACCEPTED") {
-      return <Badge className="bg-emerald-600 hover:bg-emerald-700">ACCEPTED</Badge>;
+      return <Badge className="bg-success text-white hover:bg-success/90">ACCEPTED</Badge>;
     }
     if (status === "REVOKED") {
       return <Badge variant="destructive">REVOKED</Badge>;
@@ -167,7 +167,7 @@ export function InvitationsView({
     if (status === "EXPIRED" || isExpired) {
       return <Badge variant="secondary">EXPIRED</Badge>;
     }
-    return <Badge variant="outline" className="text-amber-600 border-amber-600">PENDING</Badge>;
+    return <Badge variant="outline" className="border-warning/40 bg-warning/10 text-warning">PENDING</Badge>;
   };
 
   return (
@@ -418,4 +418,3 @@ export function InvitationsView({
     </div>
   );
 }
-

@@ -42,7 +42,7 @@ export default async function OwnerOverviewPage() {
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <Card>
+        <Card className="stat-card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Properties</CardTitle>
             <Building2 className="size-4 text-muted-foreground" />
@@ -55,7 +55,7 @@ export default async function OwnerOverviewPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="stat-card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Units</CardTitle>
             <DoorOpen className="size-4 text-muted-foreground" />
@@ -68,7 +68,7 @@ export default async function OwnerOverviewPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="stat-card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Vacant Units</CardTitle>
             <Home className="size-4 text-muted-foreground" />
@@ -81,7 +81,7 @@ export default async function OwnerOverviewPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="stat-card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Rent & Revenue</CardTitle>
             <CreditCard className="size-4 text-muted-foreground" />
@@ -94,7 +94,7 @@ export default async function OwnerOverviewPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="stat-card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Maintenance Requests</CardTitle>
             <Wrench className="size-4 text-muted-foreground" />

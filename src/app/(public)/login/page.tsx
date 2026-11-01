@@ -8,7 +8,7 @@ export default async function LoginPage() {
   const open = await isRegistrationOpen();
 
   return (
-    <div className="flex min-h-screen items-center justify-center p-4">
+    <div className="flex w-full items-center justify-center p-4">
       <LoginForm registrationOpen={open} />
     </div>
   );

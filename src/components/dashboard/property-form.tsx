@@ -9,7 +9,6 @@ import { createProperty, updateProperty } from "@/app/(dashboard)/actions/proper
 import {
   Card,
   CardHeader,
-  CardTitle,
   CardDescription,
   CardContent,
   CardFooter,
@@ -148,9 +147,9 @@ export function PropertyForm({ initialData, backHref }: PropertyFormProps) {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-xl md:text-2xl font-bold">
+          <h1 className="text-xl font-bold tracking-tight md:text-2xl">
             {isEditing ? "Edit Property" : "Add New Property"}
-          </CardTitle>
+          </h1>
           <CardDescription>
             {isEditing
               ? "Update the details, address, and amenities for this property."
@@ -354,4 +353,3 @@ export function PropertyForm({ initialData, backHref }: PropertyFormProps) {
     </div>
   );
 }
-

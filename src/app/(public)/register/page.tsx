@@ -18,7 +18,7 @@ export default async function RegisterPage() {
   const open = await isRegistrationOpen();
 
   return (
-    <div className="flex min-h-screen items-center justify-center p-4">
+    <div className="flex w-full items-center justify-center p-4">
       {open ? (
         <RegisterForm />
       ) : (

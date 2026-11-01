@@ -7,6 +7,11 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-navy: var(--navy);
+  --color-blue: var(--blue);
+  --color-bright-blue: var(--bright-blue);
+  --color-sky: var(--sky);
+  --color-gold: var(--gold);
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
   --font-heading: var(--font-sans);
@@ -24,12 +29,17 @@
   --color-chart-2: var(--chart-2);
   --color-chart-1: var(--chart-1);
   --color-ring: var(--ring);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-info: var(--info);
   --color-input: var(--input);
   --color-border: var(--border);
   --color-destructive: var(--destructive);
   --color-accent-foreground: var(--accent-foreground);
   --color-accent: var(--accent);
   --color-muted-foreground: var(--muted-foreground);
+  --color-muted-on-sky: #58677d;
   --color-muted: var(--muted);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-secondary: var(--secondary);
@@ -49,38 +59,48 @@
 }
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  color-scheme: light;
+  --navy: #0b2545;
+  --blue: #1f5fbf;
+  --bright-blue: #3b82f6;
+  --sky: #e8f1fc;
+  --gold: #e8a33d;
+  --background: #ffffff;
+  --foreground: #1e293b;
+  --card: #ffffff;
+  --card-foreground: #1e293b;
+  --popover: #ffffff;
+  --popover-foreground: #1e293b;
+  --primary: #1f5fbf;
+  --primary-foreground: #ffffff;
+  --secondary: #e8f1fc;
+  --secondary-foreground: #0b2545;
+  --muted: #e8f1fc;
+  --muted-foreground: #64748b;
+  --accent: #e8f1fc;
+  --accent-foreground: #0b2545;
+  --destructive: #b91c1c;
+  --danger: #b91c1c;
+  --success: #166534;
+  --warning: #92400e;
+  --info: #1d4ed8;
+  --border: #dce6f2;
+  --input: #dce6f2;
+  --ring: #1f5fbf;
+  --chart-1: #1f5fbf;
+  --chart-2: #3b82f6;
+  --chart-3: #166534;
+  --chart-4: #1f5fbf;
+  --chart-5: #0b2545;
+  --radius: 0.75rem;
+  --sidebar: #0b2545;
+  --sidebar-foreground: #ffffff;
+  --sidebar-primary: #3b82f6;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #e8f1fc;
+  --sidebar-accent-foreground: #0b2545;
+  --sidebar-border: #294464;
+  --sidebar-ring: #3b82f6;
 }
 
 .dark {
@@ -126,5 +146,58 @@
   }
   html {
     @apply font-sans;
+    scroll-behavior: smooth;
+  }
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    color: var(--navy);
+    font-weight: 700;
+    letter-spacing: -0.035em;
+  }
+  input,
+  select,
+  textarea {
+    border-radius: 0.75rem;
+  }
+  [data-slot="table-header"] {
+    background: var(--sky);
+  }
+  [data-slot="table-header"] [data-slot="table-head"] {
+    color: #58677d;
+  }
+  [data-slot="table-row"] {
+    transition: background-color 150ms ease;
+  }
+  [data-slot="table-row"]:hover {
+    background: color-mix(in srgb, var(--sky) 55%, white);
+  }
+  .stat-card [data-slot="card-header"] > svg {
+    box-sizing: content-box;
+    width: 1.125rem;
+    height: 1.125rem;
+    padding: 0.625rem;
+    border-radius: 9999px;
+    color: var(--blue);
+    background: var(--sky);
+  }
+  .marketing-badge {
+    color: var(--navy);
+    background: var(--gold);
+    border-color: var(--gold);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }

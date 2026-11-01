@@ -69,7 +69,7 @@ export function PropertiesGrid({ properties, basePath, canAdd }: PropertiesGridP
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {properties.map((p) => (
             <Link key={p.id} href={`${basePath}/${p.id}`} className="group">
-              <Card className="overflow-hidden h-full hover:shadow-md transition-shadow duration-200">
+              <Card className="h-full overflow-hidden rounded-2xl border-border/80 shadow-sm transition-shadow duration-200 hover:shadow-lg">
                 {/* Cover Image */}
                 <div className="relative h-44 bg-muted overflow-hidden">
                   {p.coverImage ? (
@@ -120,4 +120,3 @@ export function PropertiesGrid({ properties, basePath, canAdd }: PropertiesGridP
     </div>
   );
 }
-

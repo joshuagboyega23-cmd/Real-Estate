@@ -21,10 +21,20 @@ export const authConfig: NextAuthConfig = {
         token.activeRole = user.activeRole as Role;
         token.timezone = user.timezone;
       }
-      if (trigger === "update" && session?.activeRole) {
-        token.activeRole = session.activeRole as Role;
-        if (session.roles) {
-          token.roles = session.roles as Role[];
+      if (trigger === "update" && session) {
+        const update = session as {
+          activeRole?: Role;
+          roles?: Role[];
+          user?: { activeRole?: Role; roles?: Role[] };
+        };
+        const activeRole = update.activeRole ?? update.user?.activeRole;
+        const roles = update.roles ?? update.user?.roles;
+
+        if (activeRole) {
+          token.activeRole = activeRole;
+        }
+        if (roles) {
+          token.roles = roles;
         }
       }
       return token;

@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import type { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { formatMoney, toMinor } from "@/lib/money";
+import { site } from "@/config/site";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -21,9 +22,8 @@ import {
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Available Properties for Rent",
-  description:
-    "Explore verified rental residences, modern apartments, and homes with transparent pricing.",
+  title: `Available Properties in ${site.city}`,
+  description: site.tagline,
 };
 
 interface PropertiesPageProps {
@@ -107,7 +107,7 @@ export default async function PublicPropertiesPage(props: PropertiesPageProps) {
         <div className="container mx-auto flex h-16 items-center justify-between px-4 sm:px-6">
           <Link href="/" className="flex items-center gap-2 font-bold text-lg">
             <Building className="size-6 text-primary" />
-            <span>RealEstate Pro</span>
+            <span>{site.name}</span>
           </Link>
           <div className="flex items-center gap-3">
             <Button variant="ghost" size="sm" asChild>
@@ -342,9 +342,8 @@ export default async function PublicPropertiesPage(props: PropertiesPageProps) {
       </main>
 
       <footer className="border-t py-8 text-center text-xs text-muted-foreground">
-        © {new Date().getFullYear()} RealEstate Pro. All rights reserved.
+        © {new Date().getFullYear()} {site.name}. All rights reserved.
       </footer>
     </div>
   );
 }
-

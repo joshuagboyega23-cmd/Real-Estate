@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import { formatMoney } from "@/lib/money";
+import { site } from "@/config/site";
 import { PropertyGallery } from "@/components/public/property-gallery";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -46,7 +47,7 @@ export async function generateMetadata(
   const ogImages = property.images.length > 0 ? [{ url: property.images[0] }] : [];
 
   return {
-    title: `${property.name} - Luxury Residence in ${property.city}`,
+    title: `${property.name} in ${property.city}`,
     description:
       property.description?.slice(0, 160) ||
       `Explore units and specifications at ${property.name}, located in ${property.city}, ${property.country}.`,
@@ -85,9 +86,7 @@ export default async function PublicPropertyPage(props: PublicPropertyPageProps)
     notFound();
   }
 
-  const contactPhone = process.env.NEXT_PUBLIC_CONTACT_PHONE;
-  const contactEmail = process.env.NEXT_PUBLIC_CONTACT_EMAIL;
-  const showContactCard = !!(contactPhone || contactEmail);
+  const showContactCard = !!(site.phone || site.email || site.whatsapp);
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -96,7 +95,7 @@ export default async function PublicPropertyPage(props: PublicPropertyPageProps)
         <div className="container mx-auto flex h-16 items-center justify-between px-4 sm:px-6">
           <Link href="/" className="flex items-center gap-2 font-bold text-lg">
             <Building className="size-6 text-primary" />
-            <span>RealEstate Pro</span>
+            <span>{site.name}</span>
           </Link>
           <div className="flex items-center gap-2">
             <Button variant="outline" size="sm" asChild>
@@ -224,15 +223,15 @@ export default async function PublicPropertyPage(props: PublicPropertyPageProps)
                           </TableCell>
                           <TableCell>
                             {u.status === "VACANT" ? (
-                              <Badge variant="secondary" className="bg-emerald-500/15 text-emerald-700 dark:text-emerald-400">
+                              <Badge variant="secondary" className="border-success/20 bg-success/10 text-success">
                                 Available
                               </Badge>
                             ) : u.status === "OCCUPIED" ? (
-                              <Badge variant="outline" className="text-muted-foreground">
+                              <Badge variant="secondary" className="border-info/20 bg-info/10 text-info">
                                 Occupied
                               </Badge>
                             ) : (
-                              <Badge variant="outline" className="text-amber-600">
+                              <Badge variant="outline" className="border-warning/40 bg-warning/10 text-warning">
                                 Maintenance
                               </Badge>
                             )}
@@ -250,7 +249,7 @@ export default async function PublicPropertyPage(props: PublicPropertyPageProps)
           <div className="space-y-6">
             {/* Contact Card */}
             {showContactCard && (
-              <Card className="shadow-sm">
+              <Card className="sticky top-24 shadow-sm">
                 <CardHeader>
                   <CardTitle className="text-lg">Contact Property Team</CardTitle>
                 </CardHeader>
@@ -259,22 +258,33 @@ export default async function PublicPropertyPage(props: PublicPropertyPageProps)
                     Interested in leasing a unit or scheduling an in-person viewing? Get in touch
                     directly.
                   </p>
-                  {contactPhone && (
+                  {site.phone && (
                     <a
-                      href={`tel:${contactPhone}`}
+                      href={`tel:${site.phone}`}
                       className="flex items-center gap-2 p-2.5 rounded-lg border hover:bg-muted transition-colors font-medium text-foreground"
                     >
                       <Phone className="size-4 text-primary shrink-0" />
-                      <span>{contactPhone}</span>
+                      <span>{site.phone}</span>
                     </a>
                   )}
-                  {contactEmail && (
+                  {site.email && (
                     <a
-                      href={`mailto:${contactEmail}?subject=Inquiry regarding ${encodeURIComponent(property.name)}`}
+                      href={`mailto:${site.email}?subject=Inquiry regarding ${encodeURIComponent(property.name)}`}
                       className="flex items-center gap-2 p-2.5 rounded-lg border hover:bg-muted transition-colors font-medium text-foreground"
                     >
                       <Mail className="size-4 text-primary shrink-0" />
-                      <span className="truncate">{contactEmail}</span>
+                      <span className="truncate">{site.email}</span>
+                    </a>
+                  )}
+                  {site.whatsapp && (
+                    <a
+                      href={`https://wa.me/${site.whatsapp}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 rounded-lg border p-2.5 font-medium text-foreground transition-colors hover:bg-muted"
+                    >
+                      <Phone className="size-4 shrink-0 text-primary" />
+                      <span>Message on WhatsApp</span>
                     </a>
                   )}
                 </CardContent>
@@ -297,7 +307,7 @@ export default async function PublicPropertyPage(props: PublicPropertyPageProps)
                 </div>
                 <div className="flex justify-between py-1 border-b">
                   <span className="text-muted-foreground">Vacant Units</span>
-                  <span className="font-medium text-emerald-600 dark:text-emerald-400">
+                  <span className="font-medium text-success">
                     {property.units.filter((u) => u.status === "VACANT").length}
                   </span>
                 </div>
@@ -312,9 +322,8 @@ export default async function PublicPropertyPage(props: PublicPropertyPageProps)
       </main>
 
       <footer className="border-t py-8 text-center text-xs text-muted-foreground">
-        © {new Date().getFullYear()} RealEstate Pro. All rights reserved.
+        © {new Date().getFullYear()} {site.name}. All rights reserved.
       </footer>
     </div>
   );
 }
-

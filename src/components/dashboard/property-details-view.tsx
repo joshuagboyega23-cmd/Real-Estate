@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -26,6 +27,7 @@ import {
   ArrowLeft,
   ExternalLink,
   ShieldCheck,
+  Building2,
 } from "lucide-react";
 import { togglePublish, deleteProperty } from "@/app/(dashboard)/actions/properties";
 import { UnitsTable, type SerializedUnit } from "@/components/dashboard/units-table";
@@ -110,8 +112,13 @@ export function PropertyDetailsView({
             </Link>
           </Button>
           <div className="h-4 w-px bg-border" />
-          <div className="flex items-center gap-2">
-            <h1 className="text-xl md:text-2xl font-bold tracking-tight">{property.name}</h1>
+          <div className="flex flex-wrap items-center gap-2">
+            <div>
+              <h1 className="text-xl font-bold tracking-tight md:text-2xl">{property.name}</h1>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {property.city}{property.state ? `, ${property.state}` : ""}, {property.country}
+              </p>
+            </div>
             <Badge variant={isPublished ? "default" : "secondary"} className="gap-1 text-xs">
               {isPublished ? <Eye className="size-3" /> : <EyeOff className="size-3" />}
               {isPublished ? "Published" : "Draft"}
@@ -173,6 +180,22 @@ export function PropertyDetailsView({
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
+          </div>
+        )}
+      </div>
+
+      <div className="relative h-48 overflow-hidden rounded-2xl border border-border bg-sky sm:h-64">
+        {property.images[0] ? (
+          <Image
+            src={property.images[0]}
+            alt={`${property.name} cover`}
+            fill
+            sizes="(max-width: 768px) 100vw, 1200px"
+            className="object-cover"
+          />
+        ) : (
+          <div className="flex size-full items-center justify-center">
+            <Building2 className="size-16 text-primary/30" />
           </div>
         )}
       </div>
@@ -257,7 +280,7 @@ export function PropertyDetailsView({
                   </div>
                   <div className="flex justify-between py-1 border-b">
                     <span className="text-muted-foreground">Vacant Units</span>
-                    <span className="font-medium text-emerald-600 dark:text-emerald-400">
+                    <span className="font-medium text-success">
                       {property.units.filter((u) => u.status === "VACANT").length}
                     </span>
                   </div>
@@ -324,4 +347,3 @@ export function PropertyDetailsView({
     </div>
   );
 }
-
