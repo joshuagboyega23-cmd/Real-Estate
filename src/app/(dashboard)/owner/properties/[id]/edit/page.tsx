@@ -15,7 +15,7 @@ export default async function OwnerPropertyEditPage(props: OwnerPropertyEditPage
   await assertCanAccessProperty(user, id);
 
   const property = await prisma.property.findUnique({
-    where: { id },
+    where: { id, ownerId: user.id },
   });
 
   if (!property) {
@@ -43,4 +43,3 @@ export default async function OwnerPropertyEditPage(props: OwnerPropertyEditPage
     />
   );
 }
-

@@ -8,13 +8,21 @@ import { prisma } from "@/lib/prisma";
 import { auth, signIn, unstable_update } from "@/auth";
 import { logActivity } from "@/lib/activity";
 import { roleHomeMap } from "@/lib/permissions";
-import { checkLoginRateLimit } from "@/lib/rate-limit";
+import { checkLoginRateLimit, checkRateLimit } from "@/lib/rate-limit";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
 import {
   acceptInviteSchema,
   acceptInviteExistingSchema,
   type AcceptInviteResult,
 } from "@/lib/validations/invitation";
+
+const INVITATION_ERRORS = new Set([
+  "Invalid or unverified invitation link.",
+  "This invitation has already been accepted.",
+  "This invitation has been revoked.",
+  "This invitation has expired.",
+  "An account with this email address already exists. Please use the existing account form.",
+]);
 
 /**
  * Server action to accept an invitation for a NEW user.
@@ -31,6 +39,14 @@ export async function acceptInviteAction(data: unknown): Promise<AcceptInviteRes
 
   const { token, name, password } = parsed.data;
   const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+  const requestHeaders = await headers();
+  const forwarded = requestHeaders.get("x-forwarded-for");
+  const clientIp = forwarded
+    ? forwarded.split(",")[0].trim()
+    : requestHeaders.get("x-real-ip") || "unknown";
+  if (!checkRateLimit(`accept-invite:${clientIp}`).success) {
+    return { success: false, error: "Too many attempts. Please try again later." };
+  }
 
   try {
     const { user, role } = await prisma.$transaction(async (tx) => {
@@ -113,7 +129,7 @@ export async function acceptInviteAction(data: unknown): Promise<AcceptInviteRes
       throw error;
     }
     const message =
-      error instanceof Error
+      error instanceof Error && INVITATION_ERRORS.has(error.message)
         ? error.message
         : "Failed to accept invitation. Please try again.";
     return {
@@ -272,8 +288,6 @@ export async function acceptInviteExistingAction(data: unknown): Promise<AcceptI
     if (isRedirectError(error)) {
       throw error;
     }
-    const message =
-      error instanceof Error ? error.message : "Failed to accept invitation.";
-    return { success: false, error: message };
+    return { success: false, error: "Failed to accept invitation." };
   }
 }

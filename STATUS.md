@@ -134,3 +134,9 @@
 ## Summary & Phase 1 Progress
 - **Phase 1 Progress:** 8 of 9 steps done (scaffold, shadcn, env, schema, migration, auth, route protection, dashboards)
 - **Recommended Next Step:** Create the seed script (`prisma/seed.ts`).
+
+## Security hardening — November 1, 2026
+- Fixed audit findings 4, 5, 8, 10, and 11; added global security headers and scoped owner detail/list queries.
+- `npm run lint` passes with 3 existing React Hook Form compatibility warnings; `npm run build` passes.
+- Manual follow-ups: set the `property-images` Supabase bucket limit/MIME allow-list and migrate the in-memory rate limiter to Upstash.
+- No visual UI/styling/animation, schema, migration, or dependency changes.

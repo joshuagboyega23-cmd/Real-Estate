@@ -11,6 +11,8 @@ const roleHomeMap: Record<string, string> = {
   ADMIN: "/admin",
 };
 
+// Proxy redirects are only a routing gate; requireRole reloads the account and
+// enforces database-backed authorization in pages and server actions.
 export default auth((req) => {
   const { nextUrl } = req;
   const isLoggedIn = !!req.auth;

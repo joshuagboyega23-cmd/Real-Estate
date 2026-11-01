@@ -18,7 +18,7 @@ export default async function OwnerPropertyPage(props: OwnerPropertyPageProps) {
   await assertCanAccessProperty(user, id);
 
   const property = await prisma.property.findUnique({
-    where: { id },
+    where: { id, ownerId: user.id },
     include: {
       owner: { select: { name: true, email: true } },
       units: {
@@ -80,4 +80,3 @@ export default async function OwnerPropertyPage(props: OwnerPropertyPageProps) {
     />
   );
 }
-

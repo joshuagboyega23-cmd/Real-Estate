@@ -3,7 +3,7 @@
 import crypto from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
-import { requireRole } from "@/lib/permissions";
+import { canAccessProperty, requireRole } from "@/lib/permissions";
 import { logActivity } from "@/lib/activity";
 import { getAppUrl } from "@/lib/app-url";
 import {
@@ -46,6 +46,24 @@ export async function createInvitation(data: unknown): Promise<CreateInvitationR
       success: false,
       error: "Only owners can invite administrators.",
     };
+  }
+
+  if (unitId && !propertyId) {
+    return { success: false, error: "Unable to create invitation." };
+  }
+
+  if (propertyId && !(await canAccessProperty(user, propertyId))) {
+    return { success: false, error: "Unable to create invitation." };
+  }
+
+  if (unitId) {
+    const unit = await prisma.unit.findUnique({
+      where: { id: unitId },
+      select: { propertyId: true },
+    });
+    if (!unit || unit.propertyId !== propertyId) {
+      return { success: false, error: "Unable to create invitation." };
+    }
   }
 
   // Check if an account already exists with this email and already holds the role
@@ -106,7 +124,6 @@ export async function createInvitation(data: unknown): Promise<CreateInvitationR
       entityType: "Invitation",
       entityId: invitation.id,
       metadata: {
-        email,
         role,
         propertyId: propertyId || undefined,
         unitId: unitId || undefined,
@@ -123,8 +140,8 @@ export async function createInvitation(data: unknown): Promise<CreateInvitationR
       success: true,
       inviteLink,
     };
-  } catch (error) {
-    console.error("Failed to create invitation:", error);
+  } catch {
+    console.error("Failed to create invitation.");
     return {
       success: false,
       error: "An error occurred while creating the invitation.",
@@ -140,9 +157,28 @@ export async function revokeInvitation(invitationId: string): Promise<RevokeInvi
 
   const invitation = await prisma.invitation.findUnique({
     where: { id: invitationId },
+    select: {
+      id: true,
+      invitedById: true,
+      propertyId: true,
+      status: true,
+      role: true,
+    },
   });
 
   if (!invitation) {
+    return {
+      success: false,
+      error: "Invitation not found.",
+    };
+  }
+
+  const isInviter = invitation.invitedById === user.id;
+  const ownsReferencedProperty =
+    user.activeRole === "OWNER" &&
+    invitation.propertyId !== null &&
+    (await canAccessProperty(user, invitation.propertyId));
+  if (user.activeRole !== "ADMIN" && !isInviter && !ownsReferencedProperty) {
     return {
       success: false,
       error: "Invitation not found.",
@@ -163,30 +199,40 @@ export async function revokeInvitation(invitationId: string): Promise<RevokeInvi
     };
   }
 
+  if (invitation.status !== "PENDING") {
+    return {
+      success: false,
+      error: "Only pending invitations can be revoked.",
+    };
+  }
+
   try {
-    await prisma.invitation.update({
-      where: { id: invitationId },
+    const result = await prisma.invitation.updateMany({
+      where: { id: invitationId, status: "PENDING" },
       data: { status: "REVOKED" },
     });
+
+    if (result.count !== 1) {
+      return { success: false, error: "Only pending invitations can be revoked." };
+    }
 
     await logActivity({
       actorId: user.id,
       action: "INVITATION_REVOKED",
       entityType: "Invitation",
       entityId: invitationId,
-      metadata: { email: invitation.email, role: invitation.role },
+      metadata: { role: invitation.role },
     });
 
     revalidatePath("/owner/invitations");
     revalidatePath("/admin/invitations");
 
     return { success: true };
-  } catch (error) {
-    console.error("Failed to revoke invitation:", error);
+  } catch {
+    console.error("Failed to revoke invitation.");
     return {
       success: false,
       error: "Failed to revoke invitation. Please try again.",
     };
   }
 }
-

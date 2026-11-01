@@ -14,28 +14,12 @@ export const authConfig: NextAuthConfig = {
     strategy: "jwt",
   },
   callbacks: {
-    jwt({ token, user, trigger, session }) {
+    jwt({ token, user }) {
       if (user) {
         token.id = user.id;
         token.roles = (user.roles || []) as Role[];
         token.activeRole = user.activeRole as Role;
         token.timezone = user.timezone;
-      }
-      if (trigger === "update" && session) {
-        const update = session as {
-          activeRole?: Role;
-          roles?: Role[];
-          user?: { activeRole?: Role; roles?: Role[] };
-        };
-        const activeRole = update.activeRole ?? update.user?.activeRole;
-        const roles = update.roles ?? update.user?.roles;
-
-        if (activeRole) {
-          token.activeRole = activeRole;
-        }
-        if (roles) {
-          token.roles = roles;
-        }
       }
       return token;
     },

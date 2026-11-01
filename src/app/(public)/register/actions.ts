@@ -1,9 +1,11 @@
 "use server";
 
 import bcrypt from "bcryptjs";
+import { headers } from "next/headers";
 import { prisma } from "@/lib/prisma";
 import { logActivity } from "@/lib/activity";
 import { signIn } from "@/auth";
+import { checkRateLimit } from "@/lib/rate-limit";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
 import {
   registerSchema,
@@ -11,7 +13,7 @@ import {
 } from "@/lib/validations/auth";
 
 /**
- * Checks whether registration is currently open.
+ * Public bootstrap check; returns only whether initial registration is available.
  * Registration is only open if there are 0 users in the system.
  */
 export async function isRegistrationOpen(): Promise<boolean> {
@@ -30,6 +32,18 @@ export async function registerAction(data: unknown): Promise<RegisterResult> {
       success: false,
       error: "Please fix the validation errors below.",
       fieldErrors: parsed.error.flatten().fieldErrors,
+    };
+  }
+
+  const requestHeaders = await headers();
+  const forwarded = requestHeaders.get("x-forwarded-for");
+  const clientIp = forwarded
+    ? forwarded.split(",")[0].trim()
+    : requestHeaders.get("x-real-ip") || "unknown";
+  if (!checkRateLimit(`register:${clientIp}`).success) {
+    return {
+      success: false,
+      error: "Too many registration attempts. Please try again later.",
     };
   }
 
@@ -78,7 +92,7 @@ export async function registerAction(data: unknown): Promise<RegisterResult> {
     }
 
     const message =
-      error instanceof Error
+      error instanceof Error && error.message === "Registration is by invitation only."
         ? error.message
         : "An unexpected error occurred during registration.";
     return {

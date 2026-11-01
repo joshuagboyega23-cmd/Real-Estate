@@ -13,6 +13,12 @@ export default async function OwnerInvitationsPage() {
 
   const [invitationsData, propertiesData] = await Promise.all([
     prisma.invitation.findMany({
+      where: {
+        OR: [
+          { invitedById: user.id },
+          { property: { is: { ownerId: user.id } } },
+        ],
+      },
       orderBy: { createdAt: "desc" },
       include: {
         property: { select: { name: true } },
@@ -54,4 +60,3 @@ export default async function OwnerInvitationsPage() {
     />
   );
 }
-

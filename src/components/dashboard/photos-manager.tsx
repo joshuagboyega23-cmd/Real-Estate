@@ -19,6 +19,7 @@ import {
   ImageIcon,
 } from "lucide-react";
 import { createClient } from "@supabase/supabase-js";
+import { isPhotoContentType } from "@/lib/photo-upload";
 
 interface PhotosManagerProps {
   propertyId: string;
@@ -118,7 +119,7 @@ export function PhotosManager({
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
 
-        if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+        if (!isPhotoContentType(file.type)) {
           setErrorMessage("Only JPEG, PNG, and WebP images are allowed.");
           continue;
         }
@@ -129,9 +130,10 @@ export function PhotosManager({
         setUploadProgress(`Requesting upload URL for photo ${i + 1}...`);
         const urlRes = await getPhotoUploadUrl(
           propertyId,
-          file.name.replace(/\.[^/.]+$/, ".webp"),
           target,
-          targetId
+          targetId,
+          compressedBlob.type,
+          compressedBlob.size
         );
 
         if (!urlRes.success || !urlRes.signedUrl || !urlRes.token || !urlRes.path) {
@@ -153,7 +155,7 @@ export function PhotosManager({
           // Direct signed URL PUT fallback if client SDK env vars are absent
           const uploadRes = await fetch(urlRes.signedUrl, {
             method: "PUT",
-            headers: { "Content-Type": "image/webp" },
+            headers: { "Content-Type": compressedBlob.type },
             body: compressedBlob,
           });
 
@@ -165,7 +167,7 @@ export function PhotosManager({
         setUploadProgress(`Registering photo ${i + 1}...`);
         const confirmRes = await confirmPhotoUpload(
           propertyId,
-          urlRes.path,
+          urlRes.uploadId,
           target,
           targetId
         );

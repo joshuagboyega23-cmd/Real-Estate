@@ -55,22 +55,46 @@ export function getPublicStorageUrl(filePath: string): string {
   return `${cleanBase}/storage/v1/object/public/${BUCKET_NAME}/${cleanPath}`;
 }
 
+export function getStoragePathFromPublicUrl(publicUrl: string): string | null {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  if (!supabaseUrl) {
+    throw new Error("Storage is not configured. Missing NEXT_PUBLIC_SUPABASE_URL.");
+  }
+
+  const base = `${supabaseUrl.replace(/\/+$/, "")}/storage/v1/object/public/${BUCKET_NAME}/`;
+  if (!publicUrl.startsWith(base)) return null;
+
+  const path = publicUrl.slice(base.length);
+  if (!path || path.startsWith("/") || path.split("/").includes("..")) return null;
+  return path;
+}
+
+export async function getStorageObjectMetadata(filePath: string) {
+  const supabase = getStorageServerClient();
+  const separator = filePath.lastIndexOf("/");
+  const directory = filePath.slice(0, separator);
+  const fileName = filePath.slice(separator + 1);
+  if (separator <= 0 || !fileName) return null;
+
+  const { data, error } = await supabase.storage
+    .from(BUCKET_NAME)
+    .list(directory, { search: fileName, limit: 10 });
+  if (error) {
+    throw new Error("Unable to verify uploaded photo.");
+  }
+
+  const file = data.find((entry) => entry.name === fileName);
+  if (!file?.metadata) return null;
+  return { size: file.metadata.size, contentType: file.metadata.mimetype };
+}
+
 /**
  * Deletes a file from the property-images storage bucket.
  */
-export async function deleteStorageObject(filePathOrUrl: string) {
+export async function deleteStorageObject(filePath: string) {
   const supabase = getStorageServerClient();
-
-  // Extract relative storage path if full public URL was provided
-  let path = filePathOrUrl;
-  const prefix = `/storage/v1/object/public/${BUCKET_NAME}/`;
-  if (filePathOrUrl.includes(prefix)) {
-    path = filePathOrUrl.split(prefix)[1];
-  }
-
-  const { error } = await supabase.storage.from(BUCKET_NAME).remove([path]);
+  const { error } = await supabase.storage.from(BUCKET_NAME).remove([filePath]);
   if (error) {
-    console.error("Failed to delete storage file:", error.message);
+    console.error("Failed to delete storage file.");
   }
 }
-
