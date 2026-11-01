@@ -47,6 +47,8 @@ import {
 } from "@/components/ui/table";
 import { Copy, Check, MailPlus, Trash2 } from "lucide-react";
 import type { Role, InvitationStatus } from "@/generated/prisma/client";
+import { PageHeader } from "@/components/dashboard/page-header";
+import { EmptyState } from "@/components/dashboard/empty-state";
 
 export interface SerializedInvitation {
   id: string;
@@ -81,6 +83,9 @@ export function InvitationsView({
   const [formError, setFormError] = React.useState<string | null>(null);
   const [isSubmitting, startSubmitTransition] = React.useTransition();
   const [isRevoking, startRevokeTransition] = React.useTransition();
+  const [currentTime, setCurrentTime] = React.useState<number | null>(null);
+
+  React.useEffect(() => setCurrentTime(Date.now()), []);
 
   const allowedRoles: { label: string; value: "ADMIN" | "CARETAKER" | "TENANT" }[] =
     currentUserRole === "OWNER"
@@ -156,28 +161,26 @@ export function InvitationsView({
   };
 
   const getStatusBadge = (status: InvitationStatus, expiresAt: string) => {
-    const isExpired = new Date(expiresAt) < new Date();
+    const isExpired = currentTime !== null && new Date(expiresAt).getTime() < currentTime;
 
     if (status === "ACCEPTED") {
-      return <Badge className="bg-success text-white hover:bg-success/90">ACCEPTED</Badge>;
+      return <Badge className="border border-success/20 bg-success/10 text-success hover:bg-success/10">Accepted</Badge>;
     }
     if (status === "REVOKED") {
-      return <Badge variant="destructive">REVOKED</Badge>;
+      return <Badge className="border border-danger/20 bg-danger/10 text-danger hover:bg-danger/10">Revoked</Badge>;
     }
     if (status === "EXPIRED" || isExpired) {
-      return <Badge variant="secondary">EXPIRED</Badge>;
+      return <Badge variant="secondary" className="bg-muted text-navy">Expired</Badge>;
     }
-    return <Badge variant="outline" className="border-warning/40 bg-warning/10 text-warning">PENDING</Badge>;
+    return <Badge variant="outline" className="border-warning/40 bg-warning/10 text-warning">Pending</Badge>;
   };
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Invitations</h1>
-        <p className="text-muted-foreground text-sm mt-1">
-          Invite administrators, caretakers, and tenants to your platform.
-        </p>
-      </div>
+      <PageHeader
+        title="Invitations"
+        description="Invite administrators, caretakers, and tenants to your platform."
+      />
 
       {/* Invitation Form Card */}
       <Card>
@@ -193,7 +196,7 @@ export function InvitationsView({
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             {formError && (
-              <div className="rounded-md bg-destructive/15 p-3 text-sm font-medium text-destructive">
+              <div className="rounded-xl border border-danger/20 bg-danger/10 p-3 text-sm font-medium text-danger">
                 {formError}
               </div>
             )}
@@ -303,9 +306,12 @@ export function InvitationsView({
         </CardHeader>
         <CardContent>
           {invitations.length === 0 ? (
-            <div className="py-8 text-center text-sm text-muted-foreground">
-              No invitations sent yet.
-            </div>
+            <EmptyState
+              icon="mail"
+              title="No invitations yet"
+              description="Invitations you create will appear here."
+              className="py-10"
+            />
           ) : (
             <div className="overflow-x-auto">
               <Table>
@@ -322,7 +328,8 @@ export function InvitationsView({
                 <TableBody>
                   {invitations.map((inv) => {
                     const isPending =
-                      inv.status === "PENDING" && new Date(inv.expiresAt) > new Date();
+                      inv.status === "PENDING" &&
+                      (currentTime === null || new Date(inv.expiresAt).getTime() > currentTime);
 
                     return (
                       <TableRow key={inv.id}>
@@ -342,10 +349,11 @@ export function InvitationsView({
                         </TableCell>
                         <TableCell>{getStatusBadge(inv.status, inv.expiresAt)}</TableCell>
                         <TableCell className="text-sm text-muted-foreground">
-                          {new Date(inv.expiresAt).toLocaleDateString(undefined, {
+                          {new Date(inv.expiresAt).toLocaleDateString("en", {
                             month: "short",
                             day: "numeric",
                             year: "numeric",
+                            timeZone: "UTC",
                           })}
                         </TableCell>
                         <TableCell className="text-right">

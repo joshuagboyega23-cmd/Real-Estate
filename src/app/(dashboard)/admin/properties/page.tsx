@@ -1,6 +1,6 @@
 import { requireRole } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
-import { PropertiesGrid, type PropertyCard } from "@/components/dashboard/properties-grid";
+import { PropertiesGrid, type DashboardPropertyCard } from "@/components/dashboard/properties-grid";
 
 export const dynamic = "force-dynamic";
 
@@ -19,7 +19,7 @@ export default async function AdminPropertiesPage() {
     },
   });
 
-  const cards: PropertyCard[] = properties.map((p) => ({
+  const cards: DashboardPropertyCard[] = properties.map((p) => ({
     id: p.id,
     name: p.name,
     city: p.city,
@@ -40,4 +40,3 @@ export default async function AdminPropertiesPage() {
     />
   );
 }
-

@@ -96,6 +96,8 @@ export function PhotosManager({
   const [isUploading, setIsUploading] = React.useState(false);
   const [uploadProgress, setUploadProgress] = React.useState<string | null>(null);
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
+  const [dragOver, setDragOver] = React.useState(false);
+  const [reorderingPhoto, setReorderingPhoto] = React.useState<string | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
 
   const handleFiles = async (files: FileList | null) => {
@@ -189,12 +191,15 @@ export function PhotosManager({
     if (index === 0) return;
     const photoToMove = photos[index];
     const newOrder = [photoToMove, ...photos.filter((_, i) => i !== index)];
+    setReorderingPhoto(photoToMove);
     setPhotos(newOrder);
 
     try {
       await reorderPhotos(propertyId, newOrder, target, targetId);
     } catch {
       setPhotos(photos); // rollback
+    } finally {
+      setReorderingPhoto(null);
     }
   };
 
@@ -263,29 +268,75 @@ export function PhotosManager({
       )}
 
       {errorMessage && (
-        <div className="p-3 rounded-md bg-destructive/15 text-destructive text-sm font-medium border border-destructive/20">
+        <div className="rounded-xl border border-danger/20 bg-danger/10 p-3 text-sm font-medium text-danger">
           {errorMessage}
         </div>
       )}
 
-      {photos.length === 0 ? (
+      {photos.length < maxPhotos && (
         <div
-          onClick={() => fileInputRef.current?.click()}
-          className="flex flex-col items-center justify-center py-16 text-center gap-3 rounded-lg border border-dashed bg-muted/20 hover:bg-muted/30 cursor-pointer transition-colors"
+          role="button"
+          tabIndex={0}
+          aria-label="Choose or drop property photos"
+          aria-disabled={isUploading}
+          onClick={() => {
+            if (!isUploading) fileInputRef.current?.click();
+          }}
+          onKeyDown={(event) => {
+            if (!isUploading && (event.key === "Enter" || event.key === " ")) {
+              event.preventDefault();
+              fileInputRef.current?.click();
+            }
+          }}
+          onDragEnter={(event) => {
+            event.preventDefault();
+            if (!isUploading) setDragOver(true);
+          }}
+          onDragOver={(event) => {
+            event.preventDefault();
+            if (!isUploading) setDragOver(true);
+          }}
+          onDragLeave={(event) => {
+            if (event.relatedTarget instanceof Node && event.currentTarget.contains(event.relatedTarget)) return;
+            setDragOver(false);
+          }}
+          onDrop={(event) => {
+            event.preventDefault();
+            setDragOver(false);
+            if (!isUploading) void handleFiles(event.dataTransfer.files);
+          }}
+          className={`flex min-h-36 flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed px-5 py-8 text-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+            isUploading ? "cursor-not-allowed opacity-60" : "cursor-pointer"
+          } ${
+            dragOver
+              ? "border-primary bg-sky text-primary"
+              : "border-primary/25 bg-sky/30 hover:border-primary/50 hover:bg-sky/70"
+          }`}
         >
-          <ImageIcon className="size-10 text-muted-foreground/60" />
-          <div className="text-sm">
-            <p className="font-medium">No photos uploaded yet</p>
-            <p className="text-muted-foreground mt-0.5">
-              Click to browse or drop JPEG, PNG, or WebP images here (up to {maxPhotos} photos).
-            </p>
-          </div>
+          <span className="flex size-11 items-center justify-center rounded-full bg-white text-primary shadow-sm">
+            {dragOver ? <UploadCloud className="size-5" /> : <ImageIcon className="size-5" />}
+          </span>
+          <span className="text-sm">
+            <span className="block font-semibold text-navy">
+              {photos.length === 0 ? "Drop photos here or browse files" : "Add more photos"}
+            </span>
+            <span className="mt-1 block text-muted-foreground">
+              JPEG, PNG, or WebP · {maxPhotos - photos.length} remaining
+            </span>
+          </span>
         </div>
-      ) : (
+      )}
+
+      {photos.length > 0 && (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
           {photos.map((url, idx) => (
-            <Card key={url} className="overflow-hidden group relative">
-              <div className="relative aspect-4/3 w-full bg-muted">
+            <Card
+              key={url}
+              className={`group relative overflow-hidden rounded-2xl shadow-sm transition-[transform,opacity] duration-200 ${
+                reorderingPhoto === url ? "scale-[1.02] opacity-75" : "opacity-100"
+              }`}
+            >
+              <div className="relative aspect-[4/3] w-full bg-muted">
                 <Image
                   src={url}
                   alt={`Photo ${idx + 1}`}
@@ -296,7 +347,7 @@ export function PhotosManager({
 
                 {idx === 0 && (
                   <div className="absolute top-2 left-2">
-                    <Badge variant="default" className="text-[10px] gap-1 px-1.5 py-0 shadow">
+                    <Badge className="gap-1 border-0 bg-success px-1.5 py-0 text-[10px] text-white shadow">
                       <Star className="size-3 fill-current" />
                       Cover
                     </Badge>
@@ -304,13 +355,14 @@ export function PhotosManager({
                 )}
 
                 {/* Overlay actions on hover */}
-                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 p-2">
+                <div className="absolute inset-0 flex items-center justify-center gap-2 bg-black/50 p-2 opacity-100 transition-opacity duration-200 md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100">
                   {idx !== 0 && (
                     <Button
                       size="sm"
                       variant="secondary"
                       className="h-8 text-xs gap-1"
                       onClick={() => handleSetCover(idx)}
+                      aria-label={`Set photo ${idx + 1} as cover`}
                     >
                       <Star className="size-3" />
                       Set Cover
@@ -321,6 +373,7 @@ export function PhotosManager({
                     variant="destructive"
                     className="size-8"
                     onClick={() => handleDelete(url)}
+                    aria-label={`Delete photo ${idx + 1}`}
                   >
                     <Trash2 className="size-4" />
                     <span className="sr-only">Delete photo</span>
@@ -334,4 +387,3 @@ export function PhotosManager({
     </div>
   );
 }
-

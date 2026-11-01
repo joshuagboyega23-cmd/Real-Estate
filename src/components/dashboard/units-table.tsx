@@ -44,8 +44,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Edit, Trash2, DoorOpen, X } from "lucide-react";
+import { Plus, Edit, Trash2, X } from "lucide-react";
 import type { UnitStatus, RentPeriod } from "@/generated/prisma/client";
+import { EmptyState } from "@/components/dashboard/empty-state";
 
 export interface SerializedUnit {
   id: string;
@@ -229,82 +230,80 @@ export function UnitsTable({ propertyId, currency, units, canManage }: UnitsTabl
       </div>
 
       {units.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 text-center gap-3 rounded-lg border border-dashed bg-muted/20">
-          <DoorOpen className="size-10 text-muted-foreground/60" />
-          <div className="text-sm">
-            <p className="font-medium">No units found</p>
-            <p className="text-muted-foreground">Create individual units or apartments for leasing.</p>
-          </div>
-          {canManage && (
+        <EmptyState
+          icon="door"
+          title="No units found"
+          description="Create individual units or apartments for leasing."
+          className="py-12"
+          action={canManage ? (
             <Button size="sm" variant="outline" onClick={openAddDialog}>
               <Plus className="size-4 mr-1" />
               Add First Unit
             </Button>
-          )}
-        </div>
+          ) : undefined}
+        />
       ) : (
-        <div className="rounded-md border bg-card overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Unit Name</TableHead>
-                <TableHead>Rooms</TableHead>
-                <TableHead>Rent</TableHead>
-                <TableHead>Period</TableHead>
-                <TableHead>Status</TableHead>
-                {canManage && <TableHead className="text-right">Actions</TableHead>}
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {units.map((u) => (
-                <TableRow key={u.id}>
-                  <TableCell className="font-medium">
-                    <div>
-                      <span>{u.name}</span>
-                      {u.description && (
-                        <p className="text-xs text-muted-foreground line-clamp-1">{u.description}</p>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-sm">
-                    {u.bedrooms} Bed · {u.bathrooms} Bath
-                  </TableCell>
-                  <TableCell className="font-semibold text-sm">
-                    {formatMoney(u.rentAmount, currency)}
-                  </TableCell>
-                  <TableCell className="text-xs uppercase text-muted-foreground">
-                    {u.rentPeriod.toLowerCase()}
-                  </TableCell>
-                  <TableCell>{getStatusBadge(u.status)}</TableCell>
-                  {canManage && (
-                    <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-1">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="size-8"
-                          onClick={() => openEditDialog(u)}
-                        >
-                          <Edit className="size-4" />
-                          <span className="sr-only">Edit {u.name}</span>
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="size-8 text-destructive hover:text-destructive"
-                          onClick={() => setDeleteUnitId(u.id)}
-                        >
-                          <Trash2 className="size-4" />
-                          <span className="sr-only">Delete {u.name}</span>
-                        </Button>
-                      </div>
-                    </TableCell>
-                  )}
+        <>
+          <div className="hidden max-h-[70vh] overflow-auto rounded-2xl border bg-white shadow-sm md:block">
+            <Table>
+              <TableHeader className="sticky top-0 z-10">
+                <TableRow>
+                  <TableHead className="sticky top-0 z-10 bg-sky">Unit Name</TableHead>
+                  <TableHead className="sticky top-0 z-10 bg-sky">Rooms</TableHead>
+                  <TableHead className="sticky top-0 z-10 bg-sky">Rent</TableHead>
+                  <TableHead className="sticky top-0 z-10 bg-sky">Period</TableHead>
+                  <TableHead className="sticky top-0 z-10 bg-sky">Status</TableHead>
+                  {canManage && <TableHead className="sticky top-0 z-10 bg-sky text-right">Actions</TableHead>}
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
+              </TableHeader>
+              <TableBody>
+                {units.map((unit) => (
+                  <TableRow key={unit.id} className="transition-colors hover:bg-sky/50">
+                    <TableCell className="font-medium">
+                      <UnitName unit={unit} />
+                    </TableCell>
+                    <TableCell className="text-sm">{unit.bedrooms} Bed · {unit.bathrooms} Bath</TableCell>
+                    <TableCell className="text-sm font-semibold">{formatMoney(unit.rentAmount, currency)}</TableCell>
+                    <TableCell className="text-xs uppercase text-muted-foreground">{unit.rentPeriod.toLowerCase()}</TableCell>
+                    <TableCell>{getStatusBadge(unit.status)}</TableCell>
+                    {canManage && (
+                      <TableCell className="text-right">
+                        <UnitActionButtons
+                          unit={unit}
+                          onEdit={() => openEditDialog(unit)}
+                          onDelete={() => setDeleteUnitId(unit.id)}
+                        />
+                      </TableCell>
+                    )}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+          <div className="grid gap-3 md:hidden">
+            {units.map((unit) => (
+              <article key={unit.id} className="rounded-2xl border border-border/80 bg-white p-4 shadow-sm">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <UnitName unit={unit} />
+                  {getStatusBadge(unit.status)}
+                </div>
+                <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+                  <div className="space-y-1">
+                    <p className="text-sm text-muted-foreground">{unit.bedrooms} Bed · {unit.bathrooms} Bath</p>
+                    <p className="font-semibold text-navy">{formatMoney(unit.rentAmount, currency)} <span className="text-xs font-normal uppercase text-muted-foreground">/ {unit.rentPeriod.toLowerCase()}</span></p>
+                  </div>
+                  {canManage && (
+                    <UnitActionButtons
+                      unit={unit}
+                      onEdit={() => openEditDialog(unit)}
+                      onDelete={() => setDeleteUnitId(unit.id)}
+                    />
+                  )}
+                </div>
+              </article>
+            ))}
+          </div>
+        </>
       )}
 
       {/* Add / Edit Unit Dialog */}
@@ -470,7 +469,8 @@ export function UnitsTable({ propertyId, currency, units, canManage }: UnitsTabl
                       <button
                         type="button"
                         onClick={() => removeFeature(i)}
-                        className="text-muted-foreground hover:text-foreground"
+                        aria-label={`Remove ${f}`}
+                        className="rounded-sm text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                       >
                         <X className="size-3" />
                       </button>
@@ -519,6 +519,52 @@ export function UnitsTable({ propertyId, currency, units, canManage }: UnitsTabl
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+    </div>
+  );
+}
+
+function UnitName({ unit }: { unit: SerializedUnit }) {
+  return (
+    <div>
+      <span className="font-semibold text-navy">{unit.name}</span>
+      {unit.description && (
+        <p className="line-clamp-1 text-xs font-normal text-muted-foreground">{unit.description}</p>
+      )}
+    </div>
+  );
+}
+
+function UnitActionButtons({
+  unit,
+  onEdit,
+  onDelete,
+}: {
+  unit: SerializedUnit;
+  onEdit: () => void;
+  onDelete: () => void;
+}) {
+  return (
+    <div className="flex items-center justify-end gap-1">
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        className="size-8 focus-visible:ring-2 focus-visible:ring-ring"
+        onClick={onEdit}
+        aria-label={`Edit ${unit.name}`}
+      >
+        <Edit className="size-4" aria-hidden="true" />
+      </Button>
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        className="size-8 text-destructive hover:text-destructive focus-visible:ring-2 focus-visible:ring-ring"
+        onClick={onDelete}
+        aria-label={`Delete ${unit.name}`}
+      >
+        <Trash2 className="size-4" aria-hidden="true" />
+      </Button>
     </div>
   );
 }

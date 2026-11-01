@@ -8,8 +8,6 @@ import { propertySchema, type PropertyInput } from "@/lib/validations/property";
 import { createProperty, updateProperty } from "@/app/(dashboard)/actions/properties";
 import {
   Card,
-  CardHeader,
-  CardDescription,
   CardContent,
   CardFooter,
 } from "@/components/ui/card";
@@ -18,8 +16,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { X, Plus, ArrowLeft } from "lucide-react";
+import { X, Plus } from "lucide-react";
 import Link from "next/link";
+import { PageHeader } from "@/components/dashboard/page-header";
 
 export interface SerializedPropertyData {
   id?: string;
@@ -136,29 +135,29 @@ export function PropertyForm({ initialData, backHref }: PropertyFormProps) {
 
   return (
     <div className="space-y-6 max-w-3xl">
-      <div className="flex items-center gap-2">
-        <Button variant="ghost" size="sm" asChild>
+      <PageHeader
+        title={isEditing ? "Edit Property" : "Add New Property"}
+        description={
+          isEditing
+            ? "Update the details, address, and amenities for this property."
+            : "Enter the details to register a new property in your portfolio."
+        }
+        breadcrumbs={[
+          { label: "Properties", href: backHref },
+          { label: isEditing ? "Edit property" : "New property" },
+        ]}
+        actions={
+          <Button variant="outline" size="sm" className="rounded-xl" asChild>
           <Link href={backHref}>
-            <ArrowLeft className="size-4 mr-1" />
-            Back
+            Cancel
           </Link>
-        </Button>
-      </div>
+          </Button>
+        }
+      />
 
-      <Card>
-        <CardHeader>
-          <h1 className="text-xl font-bold tracking-tight md:text-2xl">
-            {isEditing ? "Edit Property" : "Add New Property"}
-          </h1>
-          <CardDescription>
-            {isEditing
-              ? "Update the details, address, and amenities for this property."
-              : "Enter the details to register a new property in your portfolio."}
-          </CardDescription>
-        </CardHeader>
-
+      <Card className="overflow-visible rounded-2xl border-border/80 shadow-sm">
         {errorMessage && (
-          <div className="mx-6 mb-4 p-3 rounded-md bg-destructive/15 text-destructive text-sm font-medium border border-destructive/20">
+          <div className="mx-6 mt-6 rounded-xl border border-danger/20 bg-danger/10 p-3 text-sm font-medium text-danger">
             {errorMessage}
           </div>
         )}
@@ -166,6 +165,7 @@ export function PropertyForm({ initialData, backHref }: PropertyFormProps) {
         <form onSubmit={handleSubmit(onSubmit)}>
           <CardContent className="space-y-5">
             {/* Basic Info */}
+            <h2 className="border-b border-border pb-2 text-sm font-bold uppercase tracking-wide text-navy">Property information</h2>
             <div className="space-y-1.5">
               <Label htmlFor="name">Property Name *</Label>
               <Input
@@ -193,6 +193,7 @@ export function PropertyForm({ initialData, backHref }: PropertyFormProps) {
             </div>
 
             {/* Address & Location */}
+            <h2 className="border-b border-border pb-2 pt-3 text-sm font-bold uppercase tracking-wide text-navy">Address &amp; location</h2>
             <div className="space-y-1.5">
               <Label htmlFor="address">Full Address *</Label>
               <Input
@@ -235,6 +236,7 @@ export function PropertyForm({ initialData, backHref }: PropertyFormProps) {
             </div>
 
             {/* Currency & Coordinates */}
+            <h2 className="border-b border-border pb-2 pt-3 text-sm font-bold uppercase tracking-wide text-navy">Currency &amp; coordinates</h2>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="space-y-1.5">
                 <Label htmlFor="currency">Currency Code *</Label>
@@ -278,7 +280,8 @@ export function PropertyForm({ initialData, backHref }: PropertyFormProps) {
             </div>
 
             {/* Amenities Tag Input */}
-            <div className="space-y-2 pt-2 border-t">
+            <div className="space-y-2 pt-3">
+              <h2 className="text-sm font-bold uppercase tracking-wide text-navy">Amenities &amp; highlights</h2>
               <Label>Amenities & Highlights</Label>
               <div className="flex gap-2">
                 <Input
@@ -334,7 +337,7 @@ export function PropertyForm({ initialData, backHref }: PropertyFormProps) {
             </div>
           </CardContent>
 
-          <CardFooter className="flex justify-between border-t pt-4">
+          <CardFooter className="sticky bottom-0 z-10 flex justify-between border-t bg-white/95 py-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] backdrop-blur sm:static sm:pb-4">
             <Button variant="outline" type="button" asChild>
               <Link href={backHref}>Cancel</Link>
             </Button>

@@ -24,7 +24,6 @@ import {
   Trash2,
   Eye,
   EyeOff,
-  ArrowLeft,
   ExternalLink,
   ShieldCheck,
   Building2,
@@ -32,6 +31,7 @@ import {
 import { togglePublish, deleteProperty } from "@/app/(dashboard)/actions/properties";
 import { UnitsTable, type SerializedUnit } from "@/components/dashboard/units-table";
 import { PhotosManager } from "@/components/dashboard/photos-manager";
+import { PageHeader } from "@/components/dashboard/page-header";
 
 export interface SerializedPropertyDetails {
   id: string;
@@ -102,87 +102,85 @@ export function PropertyDetailsView({
 
   return (
     <div className="space-y-6">
-      {/* Top Bar with back link and actions */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" size="sm" asChild>
-            <Link href={basePath}>
-              <ArrowLeft className="size-4 mr-1" />
-              All Properties
-            </Link>
-          </Button>
-          <div className="h-4 w-px bg-border" />
-          <div className="flex flex-wrap items-center gap-2">
-            <div>
-              <h1 className="text-xl font-bold tracking-tight md:text-2xl">{property.name}</h1>
-              <p className="mt-1 text-sm text-muted-foreground">
-                {property.city}{property.state ? `, ${property.state}` : ""}, {property.country}
-              </p>
-            </div>
-            <Badge variant={isPublished ? "default" : "secondary"} className="gap-1 text-xs">
-              {isPublished ? <Eye className="size-3" /> : <EyeOff className="size-3" />}
+      <PageHeader
+        title={property.name}
+        description={`${property.city}${property.state ? `, ${property.state}` : ""}, ${property.country}`}
+        breadcrumbs={[
+          { label: "Properties", href: basePath },
+          { label: property.name },
+        ]}
+        actions={
+          <>
+            <Badge className={`gap-1 rounded-full border-0 ${isPublished ? "bg-success text-white" : "bg-sky text-muted-foreground"}`}>
+              {isPublished ? <Eye className="size-3" aria-hidden="true" /> : <EyeOff className="size-3" aria-hidden="true" />}
               {isPublished ? "Published" : "Draft"}
             </Badge>
-          </div>
-        </div>
-
-        {canManage && (
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleTogglePublish}
-              disabled={isTogglingPublish}
-            >
-              {isPublished ? (
-                <>
-                  <EyeOff className="size-4 mr-1.5" />
-                  Unpublish
-                </>
-              ) : (
-                <>
-                  <Eye className="size-4 mr-1.5" />
-                  Publish
-                </>
-              )}
-            </Button>
-
-            <Button variant="outline" size="sm" asChild>
-              <Link href={`${basePath}/${property.id}/edit`}>
-                <Edit className="size-4 mr-1.5" />
-                Edit
-              </Link>
-            </Button>
-
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="destructive" size="sm" disabled={isDeleting}>
-                  <Trash2 className="size-4 mr-1.5" />
-                  Delete
+            {canManage && (
+              <>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="rounded-xl"
+                  onClick={handleTogglePublish}
+                  disabled={isTogglingPublish}
+                >
+                  {isPublished ? (
+                    <>
+                      <EyeOff className="size-4 mr-1.5" aria-hidden="true" />
+                      Unpublish
+                    </>
+                  ) : (
+                    <>
+                      <Eye className="size-4 mr-1.5" aria-hidden="true" />
+                      Publish
+                    </>
+                  )}
                 </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Delete Property: {property.name}?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    This will permanently remove the property. A property can only be deleted if none
-                    of its units have active or previous leases.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={handleDelete}
-                    className="bg-destructive hover:bg-destructive/90"
-                  >
-                    Confirm Delete
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          </div>
-        )}
-      </div>
+                <Button variant="outline" size="sm" className="rounded-xl" asChild>
+                  <Link href={`${basePath}/${property.id}/edit`}>
+                    <Edit className="size-4 mr-1.5" aria-hidden="true" />
+                    Edit
+                  </Link>
+                </Button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="destructive" size="sm" className="rounded-xl" disabled={isDeleting}>
+                      <Trash2 className="size-4 mr-1.5" aria-hidden="true" />
+                      Delete
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Delete Property: {property.name}?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This will permanently remove the property. A property can only be deleted if none
+                        of its units have active or previous leases.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={handleDelete}
+                        className="bg-destructive hover:bg-destructive/90"
+                      >
+                        Confirm Delete
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </>
+            )}
+            {isPublished && (
+              <Button variant="outline" size="sm" className="rounded-xl" asChild>
+                <Link href={`/properties/${property.slug}`} target="_blank">
+                  <ExternalLink className="size-4 mr-1.5" aria-hidden="true" />
+                  View public page
+                </Link>
+              </Button>
+            )}
+          </>
+        }
+      />
 
       <div className="relative h-48 overflow-hidden rounded-2xl border border-border bg-sky sm:h-64">
         {property.images[0] ? (
@@ -211,7 +209,7 @@ export function PropertyDetailsView({
         {/* Overview Tab */}
         <TabsContent value="overview" className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card className="md:col-span-2">
+            <Card className="rounded-2xl border-border/80 shadow-sm md:col-span-2">
               <CardHeader>
                 <CardTitle className="text-lg">Property Details</CardTitle>
                 <CardDescription className="flex items-center gap-1.5 text-sm mt-1">
@@ -251,21 +249,11 @@ export function PropertyDetailsView({
                   )}
                 </div>
 
-                {isPublished && (
-                  <div className="pt-4 border-t">
-                    <Button variant="outline" size="sm" asChild>
-                      <Link href={`/properties/${property.slug}`} target="_blank">
-                        <ExternalLink className="size-3.5 mr-1.5" />
-                        View Public Listing
-                      </Link>
-                    </Button>
-                  </div>
-                )}
               </CardContent>
             </Card>
 
             <div className="space-y-4">
-              <Card>
+              <Card className="rounded-2xl border-border/80 shadow-sm">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-base">Specifications</CardTitle>
                 </CardHeader>
@@ -301,7 +289,7 @@ export function PropertyDetailsView({
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="rounded-2xl border-border/80 shadow-sm">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-base flex items-center gap-2">
                     <ShieldCheck className="size-4 text-primary" />
