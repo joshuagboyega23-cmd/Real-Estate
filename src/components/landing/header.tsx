@@ -36,30 +36,50 @@ export function LandingHeader({
 }: LandingHeaderProps) {
   const [scrolled, setScrolled] = React.useState(false);
   const [menuOpen, setMenuOpen] = React.useState(false);
+  const [activeSection, setActiveSection] = React.useState("home");
 
   React.useEffect(() => {
     const updateScrollState = () => setScrolled(window.scrollY > 24);
     updateScrollState();
     window.addEventListener("scroll", updateScrollState, { passive: true });
-    return () => window.removeEventListener("scroll", updateScrollState);
+    const sectionIds = ["home", "properties", "about", "services", "testimonials", "contact"];
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visibleSections = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+        if (visibleSections[0]) setActiveSection(visibleSections[0].target.id);
+      },
+      { rootMargin: "-18% 0px -68% 0px", threshold: 0 },
+    );
+    for (const id of sectionIds) {
+      const section = document.getElementById(id);
+      if (section) observer.observe(section);
+    }
+    return () => {
+      window.removeEventListener("scroll", updateScrollState);
+      observer.disconnect();
+    };
   }, []);
 
   const navLinks = showTestimonials
     ? [...links, { label: "Testimonials", href: "#testimonials" }, { label: "Contact", href: "#contact" }]
     : [...links, { label: "Contact", href: "#contact" }];
   const headerStyle = scrolled
-    ? "bg-white/95 text-navy shadow-md backdrop-blur-md"
+    ? "h-16 border-border/80 bg-white/90 text-navy shadow-sm backdrop-blur-md"
     : "bg-transparent text-white";
 
   return (
     <header
-      className={`fixed inset-x-0 top-0 z-50 border-b border-transparent transition-colors ${headerStyle} ${
-        scrolled ? "border-border/80" : ""
+      className={`fixed inset-x-0 top-0 z-50 border-b transition-all duration-300 ${
+        scrolled
+          ? headerStyle
+          : "h-[4.5rem] border-transparent bg-transparent text-white"
       }`}
     >
-      <div className="mx-auto flex h-[4.5rem] max-w-7xl items-center justify-between gap-4 px-4 sm:px-6">
+      <div className={`mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 transition-all duration-300 sm:px-6 ${scrolled ? "h-16" : "h-[4.5rem]"}`}>
         <Link href="/" className="flex shrink-0 items-center gap-2 font-bold tracking-tight">
-          <House className="size-6" />
+          <House className="size-6 fill-current" />
           <span>{brand}</span>
         </Link>
 
@@ -68,7 +88,12 @@ export function LandingHeader({
             <a
               key={item.href}
               href={item.href}
-              className="text-sm font-medium opacity-90 transition-opacity hover:opacity-100"
+              aria-current={activeSection === item.href.slice(1) ? "location" : undefined}
+              className={`relative py-2 text-sm font-medium transition-colors after:absolute after:inset-x-0 after:-bottom-0.5 after:h-0.5 after:origin-left after:rounded-full after:bg-current after:transition-transform after:duration-300 ${
+                activeSection === item.href.slice(1)
+                  ? `${scrolled ? "text-primary" : "text-white"} after:scale-x-100`
+                  : "text-inherit after:scale-x-0 hover:after:scale-x-100"
+              }`}
             >
               {item.label}
             </a>
@@ -79,7 +104,7 @@ export function LandingHeader({
           {phone && (
             <a
               href={`tel:${phone}`}
-              className="flex items-center gap-2 text-sm font-semibold"
+              className="flex items-center gap-2 rounded-full px-3 py-2 text-sm font-semibold transition-colors hover:bg-sky/70"
             >
               <Phone className="size-4" />
               <span>{phone}</span>
@@ -89,7 +114,7 @@ export function LandingHeader({
             asChild
             size="sm"
             variant={scrolled ? "default" : "secondary"}
-            className={!scrolled ? "bg-white text-navy hover:bg-sky" : ""}
+            className={!scrolled ? "bg-white text-navy shadow-sm hover:bg-sky" : "shadow-sm"}
           >
             <Link href={isLoggedIn ? dashboardHref : "/login"}>
               {isLoggedIn ? "Dashboard" : "Sign in"}
@@ -102,7 +127,7 @@ export function LandingHeader({
             <Button
               variant="ghost"
               size="icon"
-              className={`md:hidden ${scrolled ? "text-navy" : "text-white hover:bg-white/15 hover:text-white"}`}
+              className={`md:hidden transition-colors ${scrolled ? "text-navy" : "text-white hover:bg-white/15 hover:text-white"}`}
               aria-label="Open navigation menu"
             >
               <Menu className="size-5" />

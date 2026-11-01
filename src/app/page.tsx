@@ -1,9 +1,8 @@
-import fs from "node:fs";
-import path from "node:path";
 import type { Metadata } from "next";
 import { auth } from "@/auth";
 import { site } from "@/config/site";
 import { prisma } from "@/lib/prisma";
+import { getMarketingImage } from "@/lib/marketing-images";
 import { roleHomeMap } from "@/lib/permissions";
 import { LandingHeader } from "@/components/landing/header";
 import { Hero } from "@/components/landing/hero";
@@ -15,12 +14,9 @@ import { FloatingActions } from "@/components/landing/floating-actions";
 
 export const dynamic = "force-dynamic";
 
-const publicImagesDirectory = path.join(process.cwd(), "public", "images");
-const heroImage = fs.existsSync(path.join(publicImagesDirectory, "hero.webp"))
-  ? "/images/hero.webp"
-  : fs.existsSync(path.join(publicImagesDirectory, "hero.jpg"))
-    ? "/images/hero.jpg"
-    : "/images/hero.svg";
+const heroImage = getMarketingImage("hero");
+const aboutImage = getMarketingImage("about");
+const ctaImage = getMarketingImage("cta");
 
 function isNewProperty(createdAt: Date): boolean {
   return Date.now() - createdAt.getTime() < 14 * 24 * 60 * 60 * 1000;
@@ -109,8 +105,13 @@ export default async function HomePage() {
         properties={properties}
         publishedCount={publishedCount}
         vacantUnits={vacantUnits}
+        aboutImage={aboutImage}
+        ctaImage={ctaImage}
       />
       <FloatingActions whatsapp={site.whatsapp} />
+      <noscript>
+        <style>{`.reveal,.reveal-left,.reveal-right,.reveal-scale{opacity:1!important;transform:none!important}`}</style>
+      </noscript>
     </div>
   );
 }

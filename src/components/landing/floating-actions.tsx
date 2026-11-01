@@ -5,10 +5,14 @@ import { ArrowUp, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export function FloatingActions({ whatsapp }: { whatsapp: string }) {
-  const [visible, setVisible] = React.useState(false);
+  const [hasScrolled, setHasScrolled] = React.useState(false);
+  const [showTop, setShowTop] = React.useState(false);
 
   React.useEffect(() => {
-    const updateVisibility = () => setVisible(window.scrollY > 400);
+    const updateVisibility = () => {
+      setHasScrolled(window.scrollY > 40);
+      setShowTop(window.scrollY > 400);
+    };
     updateVisibility();
     window.addEventListener("scroll", updateVisibility, { passive: true });
     return () => window.removeEventListener("scroll", updateVisibility);
@@ -27,12 +31,16 @@ export function FloatingActions({ whatsapp }: { whatsapp: string }) {
           target="_blank"
           rel="noopener noreferrer"
           aria-label="Contact us on WhatsApp"
-          className="flex size-12 items-center justify-center rounded-full bg-[#166534] text-white shadow-lg transition hover:bg-[#14532d]"
+          className={`whatsapp-pulse relative flex size-12 items-center justify-center rounded-full bg-[#166534] text-white shadow-lg transition-all duration-300 hover:bg-[#14532d] ${
+            hasScrolled
+              ? "translate-y-0 opacity-100"
+              : "pointer-events-none translate-y-3 opacity-0"
+          }`}
         >
           <MessageCircle className="size-5" />
         </a>
       )}
-      {visible && (
+      {showTop && (
         <Button
           type="button"
           size="icon"

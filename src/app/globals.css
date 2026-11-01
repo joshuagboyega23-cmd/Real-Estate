@@ -146,7 +146,6 @@
   }
   html {
     @apply font-sans;
-    scroll-behavior: smooth;
   }
   h1,
   h2,
@@ -191,6 +190,98 @@
   }
 }
 
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translate3d(0, 24px, 0);
+    transition:
+      opacity 700ms cubic-bezier(0.22, 1, 0.36, 1),
+      transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
+    transition-delay: var(--reveal-delay, 0ms);
+  }
+
+  .reveal.is-visible {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+
+  .reveal-left {
+    transform: translate3d(-32px, 0, 0);
+  }
+
+  .reveal-right {
+    transform: translate3d(32px, 0, 0);
+  }
+
+  .reveal-scale {
+    transform: scale(0.96);
+  }
+
+  .hero-zoom {
+    animation: hero-zoom 2400ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    will-change: transform;
+  }
+
+  .hero-enter {
+    opacity: 0;
+    animation: fade-up 700ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: var(--hero-delay, 0ms);
+  }
+
+  .scroll-cue {
+    animation: scroll-bounce 1800ms ease-in-out infinite;
+  }
+
+  .steps-list::before {
+    transform: scaleY(0);
+    transform-origin: top;
+    transition: transform 900ms cubic-bezier(0.22, 1, 0.36, 1) 200ms;
+  }
+
+  .reveal.is-visible .steps-list::before {
+    transform: scaleY(1);
+  }
+
+  .whatsapp-pulse::before {
+    position: absolute;
+    inset: -5px;
+    border: 1px solid rgb(22 101 52 / 45%);
+    border-radius: inherit;
+    content: "";
+    animation: whatsapp-pulse 2200ms ease-out infinite;
+  }
+
+  @keyframes hero-zoom {
+    from { transform: scale(1.08); }
+    to { transform: scale(1); }
+  }
+
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translate3d(0, 18px, 0);
+    }
+    to {
+      opacity: 1;
+      transform: translate3d(0, 0, 0);
+    }
+  }
+
+  @keyframes scroll-bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(4px); }
+  }
+
+  @keyframes whatsapp-pulse {
+    0% { opacity: 0.65; transform: scale(0.9); }
+    100% { opacity: 0; transform: scale(1.35); }
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -199,5 +290,23 @@
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+
+  .reveal,
+  .reveal-left,
+  .reveal-right,
+  .reveal-scale,
+  .hero-enter,
+  .hero-zoom,
+  .scroll-cue,
+  .steps-list::before {
+    opacity: 1 !important;
+    transform: none !important;
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .whatsapp-pulse::before {
+    display: none !important;
   }
 }

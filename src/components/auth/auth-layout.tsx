@@ -2,16 +2,18 @@ import Image from "next/image";
 import Link from "next/link";
 import { Building2 } from "lucide-react";
 import { site } from "@/config/site";
+import { getMarketingImage } from "@/lib/marketing-images";
 
 export function AuthLayout({ children }: { children: React.ReactNode }) {
+  const authImage = getMarketingImage("auth");
+
   return (
     <main className="grid min-h-screen bg-background lg:grid-cols-[1.05fr_.95fr]">
       <aside className="relative hidden min-h-screen overflow-hidden bg-sidebar lg:block">
         <Image
-          src="/images/auth.svg"
+          src={authImage}
           alt=""
           fill
-          priority
           sizes="(max-width: 1024px) 0px, 52vw"
           className="object-cover"
         />
